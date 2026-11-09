@@ -1,0 +1,4 @@
+<resources>
+    <!-- Launcher label that marks the local test build. -->
+    <string name="app_name">BrewLoop Local</string>
+</resources>

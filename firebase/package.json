@@ -1,0 +1,11 @@
+{
+  "name": "brewloop-firebase-local",
+  "private": true,
+  "description": "Local Firebase Emulator Suite for BrewLoop (demo-brewloop project only).",
+  "scripts": {
+    "emulators": "firebase emulators:start --project demo-brewloop"
+  },
+  "devDependencies": {
+    "firebase-tools": "15.34.1"
+  }
+}

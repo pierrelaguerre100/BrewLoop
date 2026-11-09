@@ -25,7 +25,17 @@ android {
                 enable = false
             }
         }
+        // Local-only variant that routes Firebase Auth and Realtime Database to the
+        // emulators of the isolated demo-brewloop project. Never used for release.
+        create("emulator") {
+            initWith(getByName("debug"))
+            matchingFallbacks += listOf("debug")
+        }
     }
+    // Instrumented tests target debug unless run with -Pbrewloop.testBuildType=emulator,
+    // which keeps emulator-only test writes away from the shared project.
+    testBuildType = providers.gradleProperty("brewloop.testBuildType").getOrElse("debug")
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -36,6 +46,7 @@ dependencies {
     implementation(libs.activity.ktx)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
     implementation(libs.material)
     testImplementation(libs.junit)

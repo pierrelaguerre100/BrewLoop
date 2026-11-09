@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BrewLoop</string>
+    <string name="sample_upload_disabled">Sample upload disabled</string>
 </resources>

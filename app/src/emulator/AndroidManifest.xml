@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Emulator build only: stops automatic initialization of the shared Firebase project and
+     allows cleartext traffic to the local emulators. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Apps targeting Android 17 (API 37) cannot reach local-network addresses such as the
+         emulator host 10.0.2.2 without this runtime permission. Grant it with
+         "adb shell pm grant com.doubleshotdevs.brewloop android.permission.ACCESS_LOCAL_NETWORK". -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
+
+    <application android:networkSecurityConfig="@xml/network_security_config">
+        <provider
+            android:name="com.google.firebase.provider.FirebaseInitProvider"
+            android:authorities="${applicationId}.firebaseinitprovider"
+            tools:node="remove" />
+    </application>
+
+</manifest>
