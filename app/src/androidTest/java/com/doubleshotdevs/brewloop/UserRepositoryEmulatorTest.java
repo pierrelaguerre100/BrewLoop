@@ -8,6 +8,7 @@ import static org.junit.Assume.assumeTrue;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -60,11 +61,12 @@ public class UserRepositoryEmulatorTest {
     public void requireLocalEmulators() {
         assumeTrue("Not the emulator build variant", FirebaseEnvironment.isLocalTestMode());
         FirebaseOptions options = FirebaseApp.getInstance().getOptions();
-        assertNotNull(options.getProjectId());
+        String projectId = options.getProjectId();
+        String databaseUrl = options.getDatabaseUrl();
         assertTrue("Refusing to run against a non-demo project",
-                options.getProjectId().startsWith("demo-"));
+                projectId != null && projectId.startsWith("demo-"));
         assertTrue("Refusing to write outside the demo database",
-                options.getDatabaseUrl() != null && options.getDatabaseUrl().contains("://demo-"));
+                databaseUrl != null && databaseUrl.contains("://demo-"));
 
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
@@ -116,8 +118,9 @@ public class UserRepositoryEmulatorTest {
     public void signUp_createsAccountInAuthEmulator() throws Exception {
         signUpTestUser();
 
-        assertNotNull(auth.getCurrentUser());
-        assertEquals(testUser.getUid(), auth.getCurrentUser().getUid());
+        FirebaseUser currentUser = auth.getCurrentUser();
+        assertNotNull(currentUser);
+        assertEquals(testUser.getUid(), currentUser.getUid());
         assertTrue(UserProfileParser.isValidUid(testUser.getUid()));
     }
 
@@ -293,7 +296,7 @@ public class UserRepositoryEmulatorTest {
         private final CountDownLatch firstDelivered = new CountDownLatch(1);
 
         @Override
-        public void onProfileLoaded(ProfileLoadResult result) {
+        public void onProfileLoaded(@NonNull ProfileLoadResult result) {
             if (count.incrementAndGet() == 1) {
                 first.set(result);
                 firstDelivered.countDown();

@@ -66,8 +66,10 @@ public class UserProfileParserTest {
         manager.put("pointsBalance", 120L);
         ProfileLoadResult result = UserProfileParser.parse(UID, manager);
         assertTrue(result.isSuccess());
-        assertTrue(result.getUser().hasStaffAccess());
-        assertEquals(120, result.getUser().pointsBalance);
+        User user = result.getUser();
+        assertNotNull(user);
+        assertTrue(user.hasStaffAccess());
+        assertEquals(120, user.pointsBalance);
     }
 
     @Test
@@ -150,7 +152,9 @@ public class UserProfileParserTest {
         wholeDouble.put("pointsBalance", 50.0);
         ProfileLoadResult result = UserProfileParser.parse(UID, wholeDouble);
         assertTrue(result.isSuccess());
-        assertEquals(50, result.getUser().pointsBalance);
+        User user = result.getUser();
+        assertNotNull(user);
+        assertEquals(50, user.pointsBalance);
     }
 
     @Test

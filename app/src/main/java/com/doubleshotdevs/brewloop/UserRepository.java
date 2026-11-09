@@ -131,7 +131,8 @@ public class UserRepository {
             finish(ProfileLoadResult.failure(ProfileLoadStatus.NETWORK_ERROR));
         };
 
-        SingleLoad(DatabaseReference profileRef, String uid, ProfileCallback callback) {
+        SingleLoad(@NonNull DatabaseReference profileRef, @NonNull String uid,
+                   @NonNull ProfileCallback callback) {
             this.profileRef = profileRef;
             this.uid = uid;
             this.callback = callback;

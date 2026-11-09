@@ -1,6 +1,7 @@
 package com.doubleshotdevs.brewloop;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import com.google.firebase.database.core.utilities.encoding.CustomClassMapper;
 
@@ -21,6 +22,7 @@ public class UserSerializationTest {
         User user = new User("uid1", "Sam Rivera", "sam@example.com", "customer", 0);
 
         Map<?, ?> stored = (Map<?, ?>) CustomClassMapper.convertToPlainJavaTypes(user);
+        assertNotNull(stored);
 
         Set<String> expected = new HashSet<>();
         expected.add(User.FIELD_USER_ID);
@@ -30,7 +32,9 @@ public class UserSerializationTest {
         expected.add(User.FIELD_POINTS_BALANCE);
         assertEquals(expected, stored.keySet());
         assertEquals("customer", stored.get(User.FIELD_ROLE));
-        assertEquals(0, ((Number) stored.get(User.FIELD_POINTS_BALANCE)).intValue());
+        Number points = (Number) stored.get(User.FIELD_POINTS_BALANCE);
+        assertNotNull(points);
+        assertEquals(0, points.intValue());
     }
 
     @Test
@@ -39,6 +43,7 @@ public class UserSerializationTest {
         Object stored = CustomClassMapper.convertToPlainJavaTypes(original);
 
         User copy = CustomClassMapper.convertToCustomClass(stored, User.class);
+        assertNotNull(copy);
 
         assertEquals(original.userID, copy.userID);
         assertEquals(original.fullName, copy.fullName);
