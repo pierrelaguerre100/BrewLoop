@@ -24,6 +24,9 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
+        <activity
+            android:name=".RewardsActivity"
+            android:exported="false"/>
 
     </application>
 

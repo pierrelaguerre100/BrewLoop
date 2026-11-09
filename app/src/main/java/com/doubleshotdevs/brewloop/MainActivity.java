@@ -1,6 +1,7 @@
 package com.doubleshotdevs.brewloop;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -70,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
                     addNewData(usersReference, "u002", new User("Jordan Lee", "jordan.lee@example.com", "staff", 0));
                     addNewData(usersReference, "u003", new User("Morgan Reyes", "morgan.reyes@example.com", "manager", 0));
 
-                    addNewData(menuReference, "m001", new MenuItem("Latte", "Hot Coffee", "Espresso with steamed milk", 4.50, true));
-                    addNewData(menuReference, "m002", new MenuItem("Cold Brew", "Iced", "Coffee over ice", 5.00, true));
-                    addNewData(menuReference, "m003", new MenuItem("Blueberry Muffin", "Pastry", "Baked fresh", 3.00, false));
+                    addNewData(menuReference, "m001", new MenuProduct("Latte", "Hot Coffee", "Espresso with steamed milk", 4.50, true, true));
+                    addNewData(menuReference, "m002", new MenuProduct("Cold Brew", "Iced", "Coffee over ice", 5.00, true, true));
+                    addNewData(menuReference, "m003", new MenuProduct("Blueberry Muffin", "Pastry", "Baked fresh", 3.00, true, false));
 
                     addNewData(optionsReference, "o001", new CustomizationOption("size","Small", 0.00));
                     addNewData(optionsReference, "o002", new CustomizationOption("size","Large", 1.00));
@@ -90,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
                     addNewData(pointsReference, "ord100_earn", new PointsTransaction("u001", "ord100", "earn", 7));
 
         });
+
+             findViewById(R.id.buttonRewards).setOnClickListener(v ->
+                     startActivity(new Intent(this, RewardsActivity.class)));
+
             readData(usersReference, textViewUsers, "USERS");
             readData(menuReference, textViewMenu, "MENU ITEMS");
             readData(optionsReference, textViewOptions, "CUSTOMIZATION OPTION");
