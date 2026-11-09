@@ -24,6 +24,12 @@
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
+        <activity
+            android:name=".CustomizationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CheckoutActivity"
+            android:exported="false" />
 
     </application>
 

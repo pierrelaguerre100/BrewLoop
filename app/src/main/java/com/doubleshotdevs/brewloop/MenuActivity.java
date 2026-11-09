@@ -1,12 +1,14 @@
 package com.doubleshotdevs.brewloop;
 
 import android.os.Bundle;
+import android.content.Intent;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,8 +43,18 @@ public class MenuActivity extends AppCompatActivity {
 
         RecyclerView list = findViewById(R.id.menuList);
         list.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MenuAdapter(shownItems, item ->
-                Toast.makeText(this, item.getName() + " selected", Toast.LENGTH_SHORT).show());
+        adapter = new MenuAdapter(shownItems, item -> {
+            Intent intent = new Intent(this, CustomizationActivity.class);
+            intent.putExtra(CustomizationActivity.EXTRA_ITEM_NAME, item.getName());
+            intent.putExtra(CustomizationActivity.EXTRA_ITEM_CATEGORY, item.getCategory());
+            intent.putExtra(CustomizationActivity.EXTRA_ITEM_PRICE, item.getBasePrice());
+            intent.putExtra(CustomizationActivity.EXTRA_IS_CUSTOMIZABLE, item.isCustomizable());
+            if (item.getCustomizationOptions() != null) {
+                intent.putStringArrayListExtra(CustomizationActivity.EXTRA_OPTIONS,
+                        new java.util.ArrayList<>(item.getCustomizationOptions()));
+            }
+            startActivity(intent);
+        });
         list.setAdapter(adapter);
 
         tabs = findViewById(R.id.categoryTabs);
@@ -62,6 +74,11 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) { }
         });
+
+        if (FirebaseApp.getApps(this).isEmpty()) {
+            showPreviewMenu();
+            return;
+        }
 
         menuRef = FirebaseDatabase.getInstance().getReference("MenuItems");
         menuListener = new ValueEventListener() {
@@ -85,6 +102,18 @@ public class MenuActivity extends AppCompatActivity {
             }
         };
         menuRef.addValueEventListener(menuListener);
+    }
+
+    /** Supplies sample products so the app remains usable without private Firebase credentials. */
+    private void showPreviewMenu() {
+        allItems.clear();
+        allItems.add(new MenuProduct("Latte", "Coffee", "Espresso with steamed milk", 4.50, true, true));
+        allItems.add(new MenuProduct("Cold Brew", "Iced", "Slow-steeped coffee over ice", 5.00, true, true));
+        allItems.add(new MenuProduct("Blueberry Muffin", "Pastry", "Baked with blueberries", 3.00, true, false));
+        rebuildTabs();
+        applyFilter();
+        Toast.makeText(this, "Showing sample menu. Add Firebase configuration to load the live menu.",
+                Toast.LENGTH_LONG).show();
     }
 
     /** Rebuilds the category tabs from the categories found in the data. */
@@ -122,6 +151,8 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        menuRef.removeEventListener(menuListener);
+        if (menuRef != null && menuListener != null) {
+            menuRef.removeEventListener(menuListener);
+        }
     }
 }

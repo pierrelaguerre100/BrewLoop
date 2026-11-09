@@ -1,6 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.gms.google.services) apply false
+}
+
+// Firebase configuration is intentionally ignored by git. Apply its plugin only
+// on machines that have supplied their own app/google-services.json file.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 android {

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF9F2"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BrewLoop · Customize"
+            android:textColor="#4A1F14"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/customizationItemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Your drink"
+            android:textColor="#24140F"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/customizationDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Make it yours"
+            android:textColor="#6D5A50"
+            android:textSize="15sp" />
+
+        <LinearLayout
+            android:id="@+id/sizeSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Size"
+                android:textColor="#4A1F14"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/sizeOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <RadioButton android:id="@+id/sizeSmall" android:layout_width="match_parent" android:layout_height="wrap_content" android:checked="true" android:text="Small · included" />
+                <RadioButton android:id="@+id/sizeMedium" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Medium · +$0.50" />
+                <RadioButton android:id="@+id/sizeLarge" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Large · +$1.00" />
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/milkSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Milk" android:textColor="#4A1F14" android:textSize="18sp" android:textStyle="bold" />
+            <Spinner android:id="@+id/milkOptions" android:layout_width="match_parent" android:layout_height="wrap_content" android:contentDescription="Choose milk" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/shotsSection"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Extra espresso shots · $0.75 each" android:textColor="#4A1F14" android:textSize="16sp" />
+            <Button android:id="@+id/removeShot" android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:text="−" />
+            <TextView android:id="@+id/shotCount" android:layout_width="40dp" android:layout_height="wrap_content" android:gravity="center" android:text="0" android:textSize="18sp" />
+            <Button android:id="@+id/addShot" android:layout_width="48dp" android:layout_height="48dp" android:minWidth="0dp" android:text="+" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/customizationPrice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="$0.00"
+            android:textColor="#4A1F14"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/addToCartButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Add to cart" />
+    </LinearLayout>
+</ScrollView>

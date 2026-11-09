@@ -2,6 +2,7 @@ package com.doubleshotdevs.brewloop;
 
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.PropertyName;
+import java.util.List;
 
 /**
  * One item on the shop menu, as stored under the "MenuItems" node in Firebase.
@@ -14,6 +15,8 @@ public class MenuProduct {
     private double basePrice;
     private boolean available = true;
     private boolean customizable;
+    /** Optional item-specific option keys such as size, milk, and shots. */
+    private List<String> customizationOptions;
 
     /** Required by Firebase for reading data. */
     public MenuProduct() { }
@@ -68,4 +71,7 @@ public class MenuProduct {
 
     @PropertyName("isCustomizable")
     public void setCustomizable(boolean customizable) { this.customizable = customizable; }
+
+    public List<String> getCustomizationOptions() { return customizationOptions; }
+    public void setCustomizationOptions(List<String> customizationOptions) { this.customizationOptions = customizationOptions; }
 }
