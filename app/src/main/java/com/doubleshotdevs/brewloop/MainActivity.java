@@ -1,5 +1,6 @@
 package com.doubleshotdevs.brewloop;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -23,11 +24,19 @@ public class MainActivity extends AppCompatActivity {
 
     DatabaseReference usersReference;
     DatabaseReference menuReference;
+    DatabaseReference optionsReference;
+    DatabaseReference ordersReference;
+    DatabaseReference orderItemsReference;
+    DatabaseReference pointsReference;
 
     FirebaseDatabase firebaseDatabase;
+
     TextView textViewUsers;
     TextView textViewMenu;
-
+    TextView textViewOptions;
+    TextView textViewOrders;
+    TextView textViewOrderItems;
+    TextView textViewPoints;
 
     Button buttonUpload;
 
@@ -36,80 +45,107 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.main), (v, insets) -> {
+                    Insets systemBars =
+                            insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(
+                            systemBars.left,
+                            systemBars.top,
+                            systemBars.right,
+                            systemBars.bottom
+                    );
+                    return insets;
+                }
+        );
+
         firebaseDatabase = FirebaseAccess.database();
         usersReference = firebaseDatabase.getReference(FirebaseNodes.USERS);
-        menuReference = firebaseDatabase.getReference(FirebaseNodes.LEGACY_MENU);
+        menuReference = firebaseDatabase.getReference("MenuItems");
+        optionsReference = firebaseDatabase.getReference("CustomizationOption");
+        ordersReference = firebaseDatabase.getReference("Orders");
+        orderItemsReference = firebaseDatabase.getReference("OrderItems");
+        pointsReference = firebaseDatabase.getReference("PointsTransaction");
 
         textViewUsers = findViewById(R.id.textviewUsers);
         textViewMenu = findViewById(R.id.textviewMenu);
+        textViewOptions = findViewById(R.id.textviewOptions);
+        textViewOrders = findViewById(R.id.textviewOrders);
+        textViewOrderItems = findViewById(R.id.textviewOrderItems);
+        textViewPoints = findViewById(R.id.textviewPoints);
         buttonUpload = findViewById(R.id.buttonUpload);
 
-        // The sample upload overwrites shared Users/Menu records in the live database,
-        // so the button is disabled and no click listener is attached.
+        // Sample uploads overwrite shared records, so no writer is attached.
         buttonUpload.setEnabled(false);
         buttonUpload.setText(R.string.sample_upload_disabled);
 
-        // Automatic starter reads are off. Users is never read in bulk: each user may read
-        // only their own profile, through UserRepository. The legacy Menu display can be
-        // restored with readData(menuReference, textViewMenu) once local emulator testing
-        // of database access is available.
-        }
+        findViewById(R.id.buttonRewards).setOnClickListener(v ->
+                startActivity(new Intent(this, RewardsActivity.class)));
+
+        // Automatic starter reads remain disabled.
+        // Load the authenticated user's profile through UserRepository.
+        // Customer orders and points require user-scoped queries.
+    }
 
     /**
-      Writes the original placeholder Users and Menu records.
-
-     <p>Not called anywhere: these writes replace existing records with the same keys
-      in the shared live database. Kept only as a reference for the sample data format.</p>
+     * Displays records from an explicitly authorized database reference.
+     *
+     * <p>Supports structured records and legacy scalar values. This helper is
+     * not called automatically and must not be used for bulk customer data.</p>
+     *
+     * @param databaseReference reference whose records may be displayed
+     * @param textView destination for the formatted records
+     * @param title heading displayed above the records
      */
     @SuppressWarnings("unused")
-    private void uploadSampleData() {
-        addNewData(usersReference, "u001", "Cristiano Ronaldo, customer, 38 pts");
-        addNewData(usersReference, "u002", "Jordan Lee, Staff, 0 pts");
-        addNewData(usersReference, "u003", "Mike Ross, Manager, 0 pts");
+    private void readData(
+            DatabaseReference databaseReference,
+            TextView textView,
+            String title
+    ) {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                StringBuilder allValues =
+                        new StringBuilder(title).append('\n');
 
-        addNewData(menuReference, "m001", "Latte, Hot Coffee, $4.50");
-        addNewData(menuReference, "m002", "Cold Brew, Iced, $5.00");
-        addNewData(menuReference, "m003", "Blueberry Muffin, Pastry, $3.00");
-    }
-        private void addNewData(DatabaseReference databaseReference,String key, String value) {
-            databaseReference.child(key).setValue(value).addOnSuccessListener(aVoid -> {
-                Toast.makeText(MainActivity.this, "Successfully to add data", Toast.LENGTH_SHORT).show();
+                if (snapshot.exists()) {
+                    for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                        allValues.append(childSnapshot.getKey()).append(": ");
 
-    }).addOnFailureListener(e -> {
-        Toast.makeText(MainActivity.this, "Failed to add data", Toast.LENGTH_SHORT).show();
-    });
-}
+                        if (childSnapshot.hasChildren()) {
+                            for (DataSnapshot fieldSnapshot
+                                    : childSnapshot.getChildren()) {
+                                allValues.append(fieldSnapshot.getKey())
+                                        .append("=")
+                                        .append(String.valueOf(fieldSnapshot.getValue()))
+                                        .append("  ");
+                            }
+                        } else {
+                            allValues.append(
+                                    String.valueOf(childSnapshot.getValue())
+                            );
+                        }
 
-private void readData(DatabaseReference databaseReference, TextView textView) {
-    databaseReference.addValueEventListener(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot snapshot) {
-            if(snapshot.exists()){
-                // getValue() without a target class never throws on structured records;
-                // children are shown in key order.
-                StringBuilder allValues = new StringBuilder();
-                for (DataSnapshot childSnapshot : snapshot.getChildren()){
-                    allValues.append(String.valueOf(childSnapshot.getValue())).append('\n');
+                        allValues.append('\n');
+                    }
+                } else {
+                    Log.d("FirebaseData", "No data found at this reference");
                 }
+
                 textView.setText(allValues.toString());
             }
-            else {
-                textView.setText("");
-                Log.e("FirebaseData", "No data found at this reference");
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseData", "Database read failed", error.toException());
+                Toast.makeText(
+                        MainActivity.this,
+                        "Failed to get data",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
-
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError error) {
-            Toast.makeText(MainActivity.this, "Failed to get data", Toast.LENGTH_SHORT).show();
-
-        }
-    });
-}
+        });
+    }
 }
