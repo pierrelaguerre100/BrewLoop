@@ -1,5 +1,6 @@
 package com.doubleshotdevs.brewloop;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -41,9 +42,14 @@ public class MenuActivity extends AppCompatActivity {
 
         RecyclerView list = findViewById(R.id.menuList);
         list.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MenuAdapter(shownItems, item ->
-                Toast.makeText(this, item.getName() + " selected", Toast.LENGTH_SHORT).show());
+        adapter = new MenuAdapter(shownItems, item -> {
+            Cart.getInstance().add(item.getItemId(), item.getName(), item.getBasePrice());
+            Toast.makeText(this, item.getName() + " added to cart", Toast.LENGTH_SHORT).show();
+        });
         list.setAdapter(adapter);
+
+        findViewById(R.id.viewCartButton).setOnClickListener(v ->
+                startActivity(new Intent(this, CartActivity.class)));
 
         tabs = findViewById(R.id.categoryTabs);
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
