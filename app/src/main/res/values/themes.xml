@@ -6,4 +6,41 @@
     </style>
 
     <style name="Theme.BrewLoop" parent="Base.Theme.BrewLoop" />
+
+    <!--
+        Coffee theme for the account screens only: sign-in, registration, and customer home.
+        It is applied to those activities in the manifest so the shared app theme, and the
+        teammates' screens that use it, are unchanged. It is always light, so the cream
+        background and dark text stay readable when the device uses dark mode.
+    -->
+    <style name="Theme.BrewLoop.Account" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/coffee_brown</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/coffee_brown_light</item>
+        <item name="colorOnPrimaryContainer">@color/coffee_text</item>
+        <item name="colorSecondary">@color/coffee_brown</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/coffee_brown_light</item>
+        <item name="colorOnSecondaryContainer">@color/coffee_text</item>
+        <item name="android:colorBackground">@color/coffee_cream</item>
+        <item name="android:windowBackground">@color/coffee_cream</item>
+        <item name="colorOnBackground">@color/coffee_text</item>
+        <item name="colorSurface">@color/coffee_cream</item>
+        <item name="colorOnSurface">@color/coffee_text</item>
+        <item name="colorOnSurfaceVariant">@color/coffee_text_secondary</item>
+        <item name="colorSurfaceContainerHighest">@color/coffee_field</item>
+        <item name="colorOutline">@color/coffee_outline</item>
+        <item name="colorError">@color/coffee_error</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:textColorPrimary">@color/coffee_text</item>
+        <item name="android:textColorSecondary">@color/coffee_text_secondary</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="android:textViewStyle">@style/Widget.BrewLoop.Account.TextView</item>
+    </style>
+
+    <!-- Dark coffee text for plain labels; views that set their own color, such as errors, keep it. -->
+    <style name="Widget.BrewLoop.Account.TextView" parent="android:Widget.TextView">
+        <item name="android:textColor">@color/coffee_text</item>
+    </style>
 </resources>

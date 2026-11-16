@@ -16,6 +16,7 @@
         <activity
             android:name=".LoginActivity"
             android:exported="true"
+            android:theme="@style/Theme.BrewLoop.Account"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,11 +27,13 @@
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
+            android:theme="@style/Theme.BrewLoop.Account"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".MainActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.BrewLoop.Account" />
 
         <activity
             android:name=".MenuActivity"

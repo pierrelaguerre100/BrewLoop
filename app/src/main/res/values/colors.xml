@@ -2,4 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Coffee palette for the account screens (sign-in, registration, customer home). -->
+    <color name="coffee_brown">#FF6F4E37</color>
+    <color name="coffee_brown_light">#FFF3E3D3</color>
+    <color name="coffee_cream">#FFFFF8F0</color>
+    <color name="coffee_field">#FFF4E8DA</color>
+    <color name="coffee_text">#FF2B1D14</color>
+    <color name="coffee_text_secondary">#FF5C4A3E</color>
+    <color name="coffee_outline">#FF8A7462</color>
+    <color name="coffee_error">#FFB3261E</color>
 </resources>
