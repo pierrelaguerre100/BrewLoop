@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "1066149699479",
+    "firebase_url": "https://brewloop-137ab-default-rtdb.firebaseio.com",
+    "project_id": "brewloop-137ab",
+    "storage_bucket": "brewloop-137ab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066149699479:android:e8778d424123c81b0feed2",
+        "android_client_info": {
+          "package_name": "com.doubleshotdevs.brewloop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBymiVbO1833vxeuvx691UZEIHzugxP-1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066149699479:android:c5ee804e5f063ee20feed2",
+        "android_client_info": {
+          "package_name": "com.example.brewloop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBymiVbO1833vxeuvx691UZEIHzugxP-1U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

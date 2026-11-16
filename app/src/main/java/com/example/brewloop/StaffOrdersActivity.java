@@ -1,5 +1,6 @@
 package com.example.brewloop;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -16,10 +17,19 @@ import com.example.brewloop.R;
  */
 public class StaffOrdersActivity extends AppCompatActivity {
 
-    /** Loads the staff screen and accounts for the Android system bars. */
+    /** Loads the staff screen or redirects to staff sign-in. */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        boolean loggedIn = getSharedPreferences("staff_demo", MODE_PRIVATE)
+                .getBoolean("logged_in", false);
+
+        if (!loggedIn) {
+            startActivity(new Intent(this, StaffLoginActivity.class));
+            finish();
+            return;
+        }
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_staff_orders);
 

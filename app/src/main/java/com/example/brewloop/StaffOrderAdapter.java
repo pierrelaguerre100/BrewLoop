@@ -12,12 +12,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.brewloop.R;
-import com.example.brewloop.StaffDemoOrders;
 import com.example.brewloop.Order;
 import com.example.brewloop.OrderItem;
 import com.example.brewloop.OrderStatus;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -32,15 +33,33 @@ public class StaffOrderAdapter extends RecyclerView.Adapter<StaffOrderAdapter.Or
         void onAdvanceStatus(Order order);
     }
 
-    private final List<Order> orders;
-    private final Map<String, List<OrderItem>> itemsByOrder;
+    private final List<Order> orders = new ArrayList<>();
+    private final Map<String, List<OrderItem>> itemsByOrder = new HashMap<>();
+
+    private final Map<String, String> itemNames = new HashMap<>();
+
     private final OnStatusActionListener listener;
 
-    public StaffOrderAdapter(List<Order> orders, Map<String, List<OrderItem>> itemsByOrder,
-                             OnStatusActionListener listener) {
-        this.orders = orders;
-        this.itemsByOrder = itemsByOrder;
+    public StaffOrderAdapter(OnStatusActionListener listener) {
+
         this.listener = listener;
+    }
+
+    /**
+     * Displays new data received from Firebase.
+     *
+     * @param newOrders newest list of orders.
+     * @param newItems OrderItems grouped by their orderID
+     * @param newItemNames menu item names grouped by itemID
+     */
+    public void setData(List<Order> newOrders, Map<String, List<OrderItem>> newItems, Map<String, String> newItemNames) {
+        orders.clear();
+        orders.addAll(newOrders);
+        itemsByOrder.clear();
+        itemsByOrder.putAll(newItems);
+        itemNames.clear();
+        itemNames.putAll(newItemNames);
+        notifyDataSetChanged();
     }
 
     /** Inflates one order card from its XML layout. */
@@ -83,7 +102,9 @@ public class StaffOrderAdapter extends RecyclerView.Adapter<StaffOrderAdapter.Or
     }
 
     @Override
-    public int getItemCount() { return orders.size(); }
+    public int getItemCount() {
+        return orders.size();
+    }
 
     /** Redraws only the order whose status has changed. */
     public void notifyOrderChanged(Order order) {
@@ -93,12 +114,15 @@ public class StaffOrderAdapter extends RecyclerView.Adapter<StaffOrderAdapter.Or
 
     /** Builds readable text for each item in a customer's order. */
     private String createItemSummary(List<OrderItem> items) {
-        if (items.isEmpty()) return "No order items found";
+        if (items == null || items.isEmpty()) return "No order items found";
         StringBuilder result = new StringBuilder();
         for (OrderItem item : items) {
             if (result.length() > 0) result.append("\n");
-            result.append(item.getQuantity()).append("× ")
-                    .append(StaffDemoOrders.menuName(item.getItemID()));
+            String itemName = itemNames.get(item.getItemID());
+            if (itemName == null) {
+                itemName = "Menu item " + item.getItemID();
+            }
+            result.append(item.getQuantity()).append("x ").append(itemName);
 
             StringBuilder options = new StringBuilder();
             if (item.getSize() != null && !"n/a".equalsIgnoreCase(item.getSize())) {

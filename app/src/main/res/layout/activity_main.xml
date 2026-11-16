@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="80dp"
-        android:text="BrewLoop"
+        android:text="@string/brewloop"
         android:textColor="#684A38"
         android:textSize="36sp"
         android:textStyle="bold"
@@ -28,20 +28,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Welcome to BrewLoop!"
+        android:text="@string/welcome_to_brewloop"
         android:textColor="#453329"
         android:textSize="20sp"
         app:layout_constraintTop_toBottomOf="@id/textAppTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Member 4 staff dashboard preview -->
+    <!-- Staff dashboard preview -->
     <Button
         android:id="@+id/buttonStaffPreview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="35dp"
-        android:text="Preview Staff Dashboard"
+        android:text="@string/staff_login"
         android:textAllCaps="false"
         android:backgroundTint="#684A38"
         android:textColor="#FFFFFF"
@@ -55,7 +55,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Upload to Firebase"
+        android:text="@string/upload_to_firebase"
         android:textAllCaps="false"
         app:layout_constraintTop_toBottomOf="@id/buttonStaffPreview"
         app:layout_constraintStart_toStartOf="parent"

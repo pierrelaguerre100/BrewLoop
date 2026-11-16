@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">BrewLoop</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="active_orders">Active orders</string>
+    <string name="orders">Orders</string>
+    <string name="brewloop">BrewLoop</string>
+    <string name="staff_login">Staff Login</string>
+    <string name="upload_to_firebase">Upload to Firebase</string>
+    <string name="welcome_to_brewloop">Welcome to BrewLoop!</string>
 </resources>

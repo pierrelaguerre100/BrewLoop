@@ -30,9 +30,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="WEEK 1 DEMO · Sample orders only"
+        android:text="WEEK 2 · Firebase Realtime Database"
         android:textSize="12sp"
         android:textColor="#866F61" />
+    
+    <TextView
+        android:id="@+id/textStaffConnection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Connecting to Firebase..."
+        android:textSize="13sp"
+        android:textColor="#715B4A" />
+
+    <Button
+        android:id="@+id/buttonStaffSignOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="6dp"
+        android:text="@string/sign_out"
+        android:textAllCaps="false"
+        android:backgroundTint="#684A38" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -52,14 +71,14 @@
                 android:id="@+id/textStaffActiveCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2"
+                android:text="0"
                 android:textStyle="bold"
                 android:textColor="#332117"
                 android:textSize="24sp" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Active orders"
+                android:text="@string/active_orders"
                 android:textColor="#715B4A"
                 android:textSize="12sp" />
         </LinearLayout>
@@ -98,7 +117,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
         android:layout_marginBottom="8dp"
-        android:text="Orders"
+        android:text="@string/orders"
         android:textStyle="bold"
         android:textSize="18sp"
         android:textColor="#302016" />
