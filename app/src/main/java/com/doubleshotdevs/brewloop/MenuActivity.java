@@ -2,6 +2,8 @@ package com.doubleshotdevs.brewloop;
 
 import android.os.Bundle;
 import android.content.Intent;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -25,15 +28,16 @@ import java.util.Set;
  */
 public class MenuActivity extends AppCompatActivity {
 
-    private static final String ALL = "All";
-
     private final List<MenuProduct> allItems = new ArrayList<>();
     private final List<MenuProduct> shownItems = new ArrayList<>();
     private MenuAdapter adapter;
     private TabLayout tabs;
+    private ImageView categoryImage;
+    private TextView categoryTitle;
+    private TextView categorySubtitle;
     private DatabaseReference menuRef;
     private ValueEventListener menuListener;
-    private String selectedCategory = ALL;
+    private String selectedCategory;
     private boolean rebuildingTabs = false;
 
     @Override
@@ -58,6 +62,14 @@ public class MenuActivity extends AppCompatActivity {
         list.setAdapter(adapter);
 
         tabs = findViewById(R.id.categoryTabs);
+        categoryImage = findViewById(R.id.categoryImage);
+        categoryTitle = findViewById(R.id.categoryTitle);
+        categorySubtitle = findViewById(R.id.categorySubtitle);
+        findViewById(R.id.menuNavHome).setOnClickListener(view -> finish());
+        findViewById(R.id.menuNavFavorites).setOnClickListener(view ->
+                Toast.makeText(this, "Favorites coming soon", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.menuNavCart).setOnClickListener(view ->
+                Toast.makeText(this, "Cart coming soon", Toast.LENGTH_SHORT).show());
         tabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -107,9 +119,15 @@ public class MenuActivity extends AppCompatActivity {
     /** Supplies sample products so the app remains usable without private Firebase credentials. */
     private void showPreviewMenu() {
         allItems.clear();
-        allItems.add(new MenuProduct("Latte", "Coffee", "Espresso with steamed milk", 4.50, true, true));
-        allItems.add(new MenuProduct("Cold Brew", "Iced", "Slow-steeped coffee over ice", 5.00, true, true));
-        allItems.add(new MenuProduct("Blueberry Muffin", "Pastry", "Baked with blueberries", 3.00, true, false));
+        allItems.add(new MenuProduct("Espresso", "Coffee", "Bold, rich, and freshly pulled", 3.00, true, true));
+        allItems.add(new MenuProduct("Cappuccino", "Coffee", "Espresso with silky steamed milk", 4.00, true, true));
+        allItems.add(new MenuProduct("Latte", "Coffee", "Smooth espresso and steamed milk", 4.50, true, true));
+        allItems.add(new MenuProduct("Hot Milk", "Milk", "Creamy steamed milk", 2.50, true, true));
+        allItems.add(new MenuProduct("Chocolate Milk", "Milk", "Warm chocolate topped with foam", 3.50, true, true));
+        allItems.add(new MenuProduct("Matcha Milk", "Milk", "Earthy matcha with steamed milk", 3.50, true, true));
+        allItems.add(new MenuProduct("Black Tea", "Tea", "A fragrant classic cup of tea", 3.00, true, false));
+        allItems.add(new MenuProduct("Green Tea", "Tea", "Delicate green tea leaves", 3.00, true, false));
+        allItems.add(new MenuProduct("Earl Grey Tea", "Tea", "Citrus-forward black tea", 3.50, true, false));
         rebuildTabs();
         applyFilter();
         Toast.makeText(this, "Showing sample menu. Add Firebase configuration to load the live menu.",
@@ -119,14 +137,13 @@ public class MenuActivity extends AppCompatActivity {
     /** Rebuilds the category tabs from the categories found in the data. */
     private void rebuildTabs() {
         Set<String> categories = new LinkedHashSet<>();
-        categories.add(ALL);
         for (MenuProduct item : allItems) {
             if (item.getCategory() != null) {
                 categories.add(item.getCategory());
             }
         }
         if (!categories.contains(selectedCategory)) {
-            selectedCategory = ALL;
+            selectedCategory = categories.isEmpty() ? null : categories.iterator().next();
         }
         rebuildingTabs = true;
         tabs.removeAllTabs();
@@ -137,15 +154,31 @@ public class MenuActivity extends AppCompatActivity {
         rebuildingTabs = false;
     }
 
-    /** Shows only the items in the selected category. */
+    /** Shows the items for the selected visual category. */
     private void applyFilter() {
         shownItems.clear();
         for (MenuProduct item : allItems) {
-            if (ALL.equals(selectedCategory) || selectedCategory.equals(item.getCategory())) {
+            if (selectedCategory != null && selectedCategory.equals(item.getCategory())) {
                 shownItems.add(item);
             }
         }
+        updateCategoryHeader();
         adapter.notifyDataSetChanged();
+    }
+
+    /** Keeps the category card aligned with the active tab. */
+    private void updateCategoryHeader() {
+        String category = selectedCategory == null ? "Hot Drinks" : selectedCategory;
+        String normalized = category.toLowerCase(Locale.US);
+        categoryTitle.setText(category.toUpperCase(Locale.US));
+        categorySubtitle.setText("Freshly prepared just for you");
+        if (normalized.contains("milk")) {
+            categoryImage.setImageResource(R.drawable.menu_category_milk);
+        } else if (normalized.contains("tea")) {
+            categoryImage.setImageResource(R.drawable.menu_category_tea);
+        } else {
+            categoryImage.setImageResource(R.drawable.menu_category_coffee);
+        }
     }
 
     @Override

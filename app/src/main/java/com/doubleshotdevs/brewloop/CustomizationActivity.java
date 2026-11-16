@@ -77,6 +77,7 @@ public class CustomizationActivity extends AppCompatActivity {
         addShot.setOnClickListener(v -> { if (extraShots < 5) extraShots++; updateShotCount(); updatePrice(); });
 
         findViewById(R.id.addToCartButton).setOnClickListener(v -> addToCart());
+        findViewById(R.id.cancelCustomizationButton).setOnClickListener(v -> finish());
         updateShotCount();
         updatePrice();
     }
