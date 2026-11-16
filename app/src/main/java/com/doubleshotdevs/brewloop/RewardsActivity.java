@@ -24,9 +24,11 @@ import java.util.ArrayList;
 
 public class RewardsActivity extends AppCompatActivity {
 
+    /**
+     * Optional extra kept for existing callers. The screen always shows the signed-in
+     * user's own points, so a different UID passed here is ignored.
+     */
     public static final String EXTRA_USER_ID = "userID";
-
-    private static final String DEFAULT_USER_ID = "u001";
 
     private TextView textViewBalance;
     private TextView textViewProgress;
@@ -43,6 +45,11 @@ public class RewardsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Points are read only for the signed-in customer, never a sample or passed-in ID.
+        String userID = Session.requireSignedInUid(this);
+        if (userID == null) {
+            return;
+        }
         setContentView(R.layout.activity_rewards);
 
         textViewBalance = findViewById(R.id.textViewBalance);
@@ -54,14 +61,10 @@ public class RewardsActivity extends AppCompatActivity {
         historyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, historyLines);
         listViewHistory.setAdapter(historyAdapter);
 
-        String userID = getIntent().getStringExtra(EXTRA_USER_ID);
-        if (userID == null) {
-            userID = DEFAULT_USER_ID;
-        }
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        balanceReference = database.getReference("Users").child(userID).child("pointsBalance");
-        historyQuery = database.getReference("PointsTransaction")
+        FirebaseDatabase database = FirebaseAccess.database();
+        balanceReference = FirebaseAccess.userProfile(database, userID)
+                .child(User.FIELD_POINTS_BALANCE);
+        historyQuery = database.getReference(FirebaseNodes.POINTS_TRANSACTION)
                 .orderByChild("userID").equalTo(userID);
 
         balanceListener = new ValueEventListener() {
@@ -101,6 +104,9 @@ public class RewardsActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (balanceReference == null) {
+            return;
+        }
         balanceReference.addValueEventListener(balanceListener);
         historyQuery.addValueEventListener(historyListener);
     }
@@ -109,6 +115,9 @@ public class RewardsActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if (balanceReference == null) {
+            return;
+        }
         balanceReference.removeEventListener(balanceListener);
         historyQuery.removeEventListener(historyListener);
     }

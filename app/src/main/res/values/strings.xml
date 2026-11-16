@@ -1,4 +1,60 @@
 <resources>
     <string name="app_name">BrewLoop</string>
-    <string name="sample_upload_disabled">Sample upload disabled</string>
+
+    <!-- Sign-in -->
+    <string name="login_subtitle">Order ahead and collect rewards.</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_open_register">Create a customer account</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_complete_profile">Finish setting up my account</string>
+    <string name="status_staff_unavailable">You are signed in with a staff account. The staff order queue is not available in this version of the app yet.</string>
+    <string name="status_profile_missing">Your account was created, but your customer profile was not saved. Finish setting up your account to continue.</string>
+
+    <!-- Registration -->
+    <string name="title_register">Create account</string>
+    <string name="register_intro">Customer accounts start with 0 points. Staff accounts are set up by the shop.</string>
+    <string name="title_complete_profile">Finish setting up</string>
+    <string name="complete_profile_intro">Signed in as %1$s. Enter your name to save your customer profile.</string>
+    <string name="hint_full_name">Full name</string>
+    <string name="hint_new_password">Password (at least 6 characters)</string>
+    <string name="hint_confirm_password">Confirm password</string>
+    <string name="action_register">Create account</string>
+    <string name="action_save_profile">Save profile</string>
+
+    <!-- Customer home -->
+    <string name="home_welcome">Welcome, %1$s</string>
+    <plurals name="home_points">
+        <item quantity="one">%1$d point</item>
+        <item quantity="other">%1$d points</item>
+    </plurals>
+    <string name="action_open_menu">Browse the menu</string>
+    <string name="action_open_rewards">Rewards</string>
+
+    <!-- Validation and account errors -->
+    <string name="error_name_required">Enter your full name.</string>
+    <string name="error_name_too_long">Use 100 characters or fewer.</string>
+    <string name="error_email_required">Enter your email address.</string>
+    <string name="error_email_invalid">Enter a valid email address.</string>
+    <string name="error_password_required">Enter your password.</string>
+    <string name="error_password_too_short">Use at least 6 characters.</string>
+    <string name="error_passwords_do_not_match">The passwords do not match.</string>
+    <string name="error_wrong_credentials">The email or password is incorrect.</string>
+    <string name="error_email_in_use">An account already uses this email. Sign in instead.</string>
+    <string name="error_account_disabled">This account has been disabled. Contact the shop.</string>
+    <string name="error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
+    <string name="error_network">Could not connect. Check your connection and try again.</string>
+    <string name="error_auth_generic">Something went wrong. Try again.</string>
+    <string name="error_not_signed_in">You are signed out. Sign in again.</string>
+
+    <!-- Profile errors -->
+    <string name="error_profile_network">Could not load your profile. Check your connection and try again.</string>
+    <string name="error_profile_save_network">Your account was created, but your profile could not be saved yet. Check your connection and save it again.</string>
+    <string name="error_profile_denied">Your profile could not be accessed. Contact the shop.</string>
+    <string name="error_profile_malformed">Your profile has a problem the shop needs to fix. Contact the shop.</string>
+    <string name="error_profile_role">Your account role is not recognized. Contact the shop.</string>
+    <string name="error_profile_missing">Your customer profile has not been saved yet.</string>
+    <string name="error_profile_unknown">Something went wrong loading your profile. Try again.</string>
 </resources>

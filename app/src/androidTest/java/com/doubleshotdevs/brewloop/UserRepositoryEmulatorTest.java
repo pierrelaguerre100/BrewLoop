@@ -17,9 +17,9 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>Runs only in the {@code emulator} build variant
  * ({@code gradlew connectedEmulatorAndroidTest -Pbrewloop.testBuildType=emulator}) and is
  * skipped, before any Firebase call, in builds that use the shared project. Each test uses a
- * new Auth emulator account with a random email and password, writes only that account's
+ * new Auth emulator account with a random email and password, seeds only that account's
  * own {@code Users/{uid}} record in the Database emulator, and deletes both afterwards.</p>
  */
 @RunWith(AndroidJUnit4.class)
@@ -51,7 +51,6 @@ public class UserRepositoryEmulatorTest {
 
     private FirebaseAuth auth;
     private FirebaseUser testUser;
-    private DatabaseReference testRecord;
 
     /**
      * Skips the test unless Firebase is routed to a demo project's emulators, then grants the
@@ -87,8 +86,9 @@ public class UserRepositoryEmulatorTest {
         // Every step runs even if an earlier one fails, so a failed test cannot leave its
         // emulator account behind.
         try {
-            if (testRecord != null) {
-                Tasks.await(testRecord.removeValue(), WAIT_SECONDS, TimeUnit.SECONDS);
+            if (testUser != null) {
+                // Users cannot delete their own profile under the security rules.
+                EmulatorAdmin.delete(FirebaseNodes.USERS + "/" + testUser.getUid());
             }
         } finally {
             try {
@@ -228,14 +228,20 @@ public class UserRepositoryEmulatorTest {
     }
 
     /**
-     * Writes a value at the signed-in test user's own {@code Users/{uid}} in the emulator.
+     * Stores a value at the test user's own {@code Users/{uid}} in the emulator.
      *
-     * @param value the record to store
+     * <p>The value is written with emulator administrator access, as the shop owner would
+     * in the Firebase Console, because the security rules only let the app create valid
+     * customer profiles and these tests need other shapes.</p>
+     *
+     * @param value the record to store: a {@link Map} or a text value
      * @throws Exception if the write does not complete
      */
     private void writeOwnRecord(Object value) throws Exception {
-        testRecord = FirebaseAccess.userProfile(FirebaseAccess.database(), testUser.getUid());
-        Tasks.await(testRecord.setValue(value), WAIT_SECONDS, TimeUnit.SECONDS);
+        String json = value instanceof Map
+                ? new JSONObject((Map<?, ?>) value).toString()
+                : JSONObject.quote(String.valueOf(value));
+        EmulatorAdmin.put(FirebaseNodes.USERS + "/" + testUser.getUid(), json);
     }
 
     /**

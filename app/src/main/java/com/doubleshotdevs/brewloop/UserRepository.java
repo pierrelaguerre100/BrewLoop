@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -12,15 +13,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Loads the signed-in user's own profile from {@code Users/{uid}}.
+ * Loads and creates the signed-in user's own profile at {@code Users/{uid}}.
  *
- * <p>Only the caller's own record is read; this class never reads the whole {@code Users}
- * node. It does not create profiles or change points balances. Every load ends with
- * exactly one callback on the main thread, including when the record is missing or
- * malformed, the read is denied, or the database cannot be reached.</p>
+ * <p>Only the caller's own record is read or written; this class never reads the whole
+ * {@code Users} node. It never changes an existing profile, role, or points balance: a
+ * profile is only ever created when no record exists. Every operation ends with exactly one
+ * callback on the main thread, including when the record is missing or malformed, the
+ * request is denied, or the database cannot be reached.</p>
  */
 public class UserRepository {
 
@@ -97,6 +104,68 @@ public class UserRepository {
         profileRef.addListenerForSingleValueEvent(load);
         mainHandler.postDelayed(load.timeout, timeoutMillis);
         return load;
+    }
+
+    /**
+     * Creates the signed-in user's customer profile if, and only if, no profile exists yet.
+     *
+     * <p>This is used both right after registration and to recover an account whose
+     * registration was interrupted after the Authentication account was created. The new
+     * record always has the role {@code customer} and zero points; there is no way to choose
+     * another role. The write runs as a database transaction that gives up when any record
+     * is already present, so an existing profile, role, or points balance is never
+     * overwritten. In that case the existing record is validated and returned instead.</p>
+     *
+     * <p>If no answer arrives within the timeout the result is
+     * {@link ProfileLoadStatus#NETWORK_ERROR}. The write may still complete later, which is
+     * safe: calling this method again finds the record and returns it.</p>
+     *
+     * @param fullName the customer's full name; surrounding spaces are removed
+     * @param callback receives the created or existing profile, or the failure, on the main
+     *                 thread
+     * @return a handle that stops the callback from being delivered
+     */
+    @NonNull
+    public PendingLoad createCustomerProfileIfMissing(@NonNull String fullName,
+                                                      @NonNull ProfileCallback callback) {
+        FirebaseUser firebaseUser = auth.getCurrentUser();
+        if (firebaseUser == null) {
+            return deliverLater(callback, ProfileLoadResult.failure(ProfileLoadStatus.NOT_SIGNED_IN));
+        }
+        String uid = firebaseUser.getUid();
+        String email = firebaseUser.getEmail();
+        String trimmedName = fullName.trim();
+        if (!UserProfileParser.isValidUid(uid) || email == null || email.isEmpty()
+                || trimmedName.isEmpty()) {
+            return deliverLater(callback, ProfileLoadResult.failure(ProfileLoadStatus.MALFORMED));
+        }
+
+        DatabaseReference profileRef = FirebaseAccess.userProfile(database, uid);
+        ProfileCreation creation = new ProfileCreation(
+                uid, newCustomerRecord(uid, trimmedName, email), callback);
+        profileRef.runTransaction(creation);
+        mainHandler.postDelayed(creation.timeout, timeoutMillis);
+        return creation;
+    }
+
+    /**
+     * Builds the record stored for a newly registered customer.
+     *
+     * @param uid      the Firebase Authentication UID
+     * @param fullName the customer's trimmed full name
+     * @param email    the sign-in email address from Firebase Authentication
+     * @return the record fields: the customer role and a zero points balance
+     */
+    @NonNull
+    static Map<String, Object> newCustomerRecord(@NonNull String uid, @NonNull String fullName,
+                                                 @NonNull String email) {
+        Map<String, Object> record = new HashMap<>();
+        record.put(User.FIELD_USER_ID, uid);
+        record.put(User.FIELD_FULL_NAME, fullName);
+        record.put(User.FIELD_EMAIL, email);
+        record.put(User.FIELD_ROLE, UserRole.CUSTOMER.getDatabaseValue());
+        record.put(User.FIELD_POINTS_BALANCE, 0);
+        return record;
     }
 
     /**
@@ -186,6 +255,89 @@ public class UserRepository {
         private void stopListening() {
             mainHandler.removeCallbacks(timeout);
             profileRef.removeEventListener(this);
+        }
+    }
+
+    /**
+     * One create-if-missing transaction that reports exactly once: with the new or existing
+     * profile, a database error, a timeout, or cancellation.
+     *
+     * <p>{@link #doTransaction} runs on a background thread and may run several times, so it
+     * only decides whether to write. Everything else runs on the main thread.</p>
+     */
+    private final class ProfileCreation implements Transaction.Handler, PendingLoad {
+
+        private final String uid;
+        private final Map<String, Object> newRecord;
+        private final ProfileCallback callback;
+        private boolean finished;
+
+        final Runnable timeout = () -> {
+            Log.w(TAG, "Profile creation timed out");
+            finish(ProfileLoadResult.failure(ProfileLoadStatus.NETWORK_ERROR));
+        };
+
+        ProfileCreation(@NonNull String uid, @NonNull Map<String, Object> newRecord,
+                        @NonNull ProfileCallback callback) {
+            this.uid = uid;
+            this.newRecord = newRecord;
+            this.callback = callback;
+        }
+
+        @NonNull
+        @Override
+        public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+            if (currentData.getValue() != null) {
+                // A profile already exists: never overwrite it.
+                return Transaction.abort();
+            }
+            currentData.setValue(newRecord);
+            return Transaction.success(currentData);
+        }
+
+        @Override
+        public void onComplete(@Nullable DatabaseError error, boolean committed,
+                               @Nullable DataSnapshot snapshot) {
+            ProfileLoadResult result;
+            if (error != null) {
+                ProfileLoadStatus status = UserProfileParser.statusForDatabaseError(error.getCode());
+                Log.w(TAG, "Profile creation failed with code " + error.getCode() + ": " + status);
+                result = ProfileLoadResult.failure(status);
+            } else {
+                // Committed: the new record. Not committed: the record that already existed.
+                Object value = snapshot == null ? null : snapshot.getValue();
+                try {
+                    result = UserProfileParser.parse(uid, value);
+                } catch (RuntimeException e) {
+                    Log.w(TAG, "Existing profile could not be read", e);
+                    result = ProfileLoadResult.failure(ProfileLoadStatus.MALFORMED);
+                }
+                if (!committed && !result.isSuccess()) {
+                    Log.w(TAG, "Existing profile is unusable: " + result.getStatus());
+                }
+            }
+            ProfileLoadResult delivered = result;
+            mainHandler.post(() -> finish(delivered));
+        }
+
+        @Override
+        public void cancel() {
+            finished = true;
+            mainHandler.removeCallbacks(timeout);
+        }
+
+        /**
+         * Delivers the result if this operation has not already finished.
+         *
+         * @param result the result to deliver
+         */
+        private void finish(@NonNull ProfileLoadResult result) {
+            if (finished) {
+                return;
+            }
+            finished = true;
+            mainHandler.removeCallbacks(timeout);
+            callback.onProfileLoaded(result);
         }
     }
 }

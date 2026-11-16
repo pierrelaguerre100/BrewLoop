@@ -1,95 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/buttonUpload"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"/>
-
-        <Button
-            android:id="@+id/buttonRewards"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rewards" />
+        android:padding="24dp">
 
         <TextView
-            android:id="@+id/textviewUsers"
+            android:id="@+id/textviewWelcome"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
+            android:text="@string/app_name"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-
-        <TextView
-            android:id="@+id/textviewUsers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
-
-        <TextView
-            android:id="@+id/textviewMenu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
-        <TextView
-            android:id="@+id/textviewOptions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
-        <TextView
-            android:id="@+id/textviewOrders"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
-        <TextView
-            android:id="@+id/textviewOrderItems"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:textSize="12sp"/>
         <TextView
             android:id="@+id/textviewPoints"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"/>
+            android:layout_marginTop="8dp"
+            android:textSize="16sp" />
+
+        <ProgressBar
+            android:id="@+id/progressHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/textviewHomeError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="?attr/colorError"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/buttonHomeRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_retry"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/buttonMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/action_open_menu" />
+
+        <Button
+            android:id="@+id/buttonRewards"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/action_open_rewards" />
+
+        <Button
+            android:id="@+id/buttonSignOut"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/action_sign_out" />
 
     </LinearLayout>
-    </ScrollView>
-
-    <Button
-        android:id="@+id/buttonUpload"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="64dp"
-        android:text="Add Sample Data"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

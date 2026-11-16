@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.Transaction;
@@ -37,7 +36,7 @@ public class RewardsHelper {
         return Math.min(drinkPrice, MAX_REWARD_VALUE);
     }
     public static void awardPoints(String orderID) {
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference root = FirebaseAccess.database().getReference();
         root.child("Orders").child(orderID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -63,7 +62,7 @@ public class RewardsHelper {
         });
     }
     public static void redeemReward(String userID, String orderID, RedeemListener listener) {
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference root = FirebaseAccess.database().getReference();
         root.child("Users").child(userID).child("pointsBalance")
                 .runTransaction(new Transaction.Handler() {
                     @NonNull

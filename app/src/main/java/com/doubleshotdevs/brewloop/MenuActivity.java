@@ -10,7 +10,6 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -37,6 +36,10 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // The menu is readable only by signed-in users.
+        if (Session.requireSignedInUid(this) == null) {
+            return;
+        }
         setContentView(R.layout.activity_menu);
 
         RecyclerView list = findViewById(R.id.menuList);
@@ -63,7 +66,7 @@ public class MenuActivity extends AppCompatActivity {
             public void onTabReselected(TabLayout.Tab tab) { }
         });
 
-        menuRef = FirebaseDatabase.getInstance().getReference("MenuItems");
+        menuRef = FirebaseAccess.node(FirebaseNodes.MENU_ITEMS);
         menuListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -122,6 +125,8 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        menuRef.removeEventListener(menuListener);
+        if (menuRef != null) {
+            menuRef.removeEventListener(menuListener);
+        }
     }
 }

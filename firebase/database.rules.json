@@ -1,0 +1,148 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "Users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid && !data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['userID', 'fullName', 'email', 'role', 'pointsBalance'])",
+        "userID": {
+          ".validate": "newData.val() === $uid"
+        },
+        "fullName": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 254"
+        },
+        "role": {
+          ".validate": "newData.isString() && ((!data.exists() && newData.val() === 'customer') || newData.val() === data.val())"
+        },
+        "pointsBalance": {
+          ".write": "auth != null && data.exists() && ((auth.uid === $uid && newData.val() === data.val() - 50) || ((root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager') && newData.val() > data.val()))",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0 && (data.exists() || newData.val() === 0)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "MenuItems": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('Users').child(auth.uid).child('role').val() === 'manager'"
+    },
+
+    "CustomizationOption": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('Users').child(auth.uid).child('role').val() === 'manager'"
+    },
+
+    "Orders": {
+      ".read": "auth != null && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager' || (query.orderByChild === 'userID' && query.equalTo === auth.uid))",
+      ".indexOn": ["userID"],
+      "$orderId": {
+        ".read": "auth != null && (!data.exists() || data.child('userID').val() === auth.uid || root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
+        ".write": "auth != null && !data.exists() && newData.child('userID').val() === auth.uid && root.child('Users').child(auth.uid).child('role').val() === 'customer'",
+        ".validate": "newData.hasChildren(['orderID', 'userID', 'status', 'pickupTime', 'totalPrice', 'pointsEarned', 'rewardApplied', 'pointsAwarded'])",
+        "orderID": {
+          ".validate": "newData.val() === $orderId"
+        },
+        "userID": {
+          ".validate": "newData.isString() && (!data.exists() || newData.val() === data.val())"
+        },
+        "status": {
+          ".write": "auth != null && data.exists() && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
+          ".validate": "newData.isString() && ((!data.exists() && newData.val() === 'Received') || newData.val() === data.val() || (data.val() === 'Received' && newData.val() === 'Preparing') || (data.val() === 'Preparing' && newData.val() === 'Ready') || (data.val() === 'Ready' && newData.val() === 'Completed'))"
+        },
+        "pickupTime": {
+          ".validate": "newData.isString() && newData.val().matches(/^([01][0-9]|2[0-3]):[0-5][0-9]$/) && (!data.exists() || newData.val() === data.val())"
+        },
+        "totalPrice": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && (!data.exists() || newData.val() === data.val())"
+        },
+        "pointsEarned": {
+          ".write": "auth != null && data.parent().child('pointsAwarded').val() === false && newData.parent().child('pointsAwarded').val() === true && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+        },
+        "rewardApplied": {
+          ".validate": "newData.isBoolean() && (!data.exists() || newData.val() === data.val())"
+        },
+        "pointsAwarded": {
+          ".write": "auth != null && data.val() === false && newData.val() === true && newData.parent().child('status').val() === 'Completed' && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
+          ".validate": "newData.isBoolean() && (data.exists() || newData.val() === false)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "OrderItems": {
+      ".read": "auth != null && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager' || (query.orderByChild === 'orderID' && query.equalTo != null && root.child('Orders').child(query.equalTo).child('userID').val() === auth.uid))",
+      ".indexOn": ["orderID"],
+      "$itemId": {
+        ".read": "auth != null && data.exists() && root.child('Orders').child(data.child('orderID').val()).child('userID').val() === auth.uid",
+        ".write": "auth != null && !data.exists() && newData.child('orderID').isString() && $itemId.beginsWith(newData.child('orderID').val() + '_') && !root.child('Orders').child(newData.child('orderID').val()).exists() && newData.parent().parent().child('Orders').child(newData.child('orderID').val()).child('userID').val() === auth.uid",
+        ".validate": "newData.hasChildren(['orderItemID', 'orderID', 'itemID', 'size', 'milkType', 'extraShots', 'quantity', 'itemTotal'])",
+        "orderItemID": {
+          ".validate": "newData.val() === $itemId"
+        },
+        "orderID": {
+          ".validate": "newData.isString()"
+        },
+        "itemID": {
+          ".validate": "newData.isString() && root.child('MenuItems').child(newData.val()).exists()"
+        },
+        "size": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "milkType": {
+          ".validate": "newData.isString() && newData.val().length <= 40"
+        },
+        "extraShots": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 10 && newData.val() % 1 === 0"
+        },
+        "quantity": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 20 && newData.val() % 1 === 0"
+        },
+        "itemTotal": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
+    "PointsTransaction": {
+      ".read": "auth != null && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager' || (query.orderByChild === 'userID' && query.equalTo === auth.uid))",
+      ".indexOn": ["userID"],
+      "$txId": {
+        ".read": "auth != null && data.exists() && (data.child('userID').val() === auth.uid || root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
+        ".write": "auth != null && !data.exists() && newData.child('orderID').isString() && ((newData.child('type').val() === 'redeem' && newData.child('userID').val() === auth.uid && newData.child('points').val() === -50 && $txId === newData.child('orderID').val() + '_redeem') || (newData.child('type').val() === 'earn' && $txId === newData.child('orderID').val() + '_earn' && root.child('Orders').child(newData.child('orderID').val()).child('userID').val() === newData.child('userID').val() && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')))",
+        ".validate": "newData.hasChildren(['userID', 'orderID', 'type', 'points'])",
+        "transactionID": {
+          ".validate": "newData.val() === $txId"
+        },
+        "userID": {
+          ".validate": "newData.isString()"
+        },
+        "orderID": {
+          ".validate": "newData.isString()"
+        },
+        "type": {
+          ".validate": "newData.val() === 'earn' || newData.val() === 'redeem'"
+        },
+        "points": {
+          ".validate": "newData.isNumber() && newData.val() % 1 === 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

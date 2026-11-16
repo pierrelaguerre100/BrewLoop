@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/login_subtitle" />
+
+        <ProgressBar
+            android:id="@+id/progressLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
+
+        <!-- Sign-in form, shown when nobody is signed in. -->
+        <LinearLayout
+            android:id="@+id/groupLoginForm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutLoginEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_email">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputLoginEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="emailAddress"
+                    android:inputType="textEmailAddress" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layoutLoginPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="@string/hint_password">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputLoginPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autofillHints="password"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/textLoginError"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="?attr/colorError"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/buttonSignIn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_sign_in" />
+
+            <Button
+                android:id="@+id/buttonOpenRegister"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/action_open_register" />
+        </LinearLayout>
+
+        <!-- Shown for a signed-in user who cannot be routed to a screen. -->
+        <LinearLayout
+            android:id="@+id/groupLoginStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textLoginStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/buttonLoginRetry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/action_retry" />
+
+            <Button
+                android:id="@+id/buttonCompleteProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/action_complete_profile" />
+
+            <Button
+                android:id="@+id/buttonLoginSignOut"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/action_sign_out" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

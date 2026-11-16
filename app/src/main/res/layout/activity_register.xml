@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".RegisterActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:id="@+id/textRegisterTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/title_register"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textRegisterIntro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/register_intro" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutRegisterName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_full_name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputRegisterName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="name"
+                android:inputType="textPersonName|textCapWords" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutRegisterEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_email">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputRegisterEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="emailAddress"
+                android:inputType="textEmailAddress" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutRegisterPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_new_password">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputRegisterPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="newPassword"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutRegisterConfirm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/hint_confirm_password">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/inputRegisterConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="newPassword"
+                android:inputType="textPassword" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/textRegisterError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/colorError"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progressRegister"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/action_register" />
+
+        <Button
+            android:id="@+id/buttonRegisterSignOut"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_sign_out"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView>
