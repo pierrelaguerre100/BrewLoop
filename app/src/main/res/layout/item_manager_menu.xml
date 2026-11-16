@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_marginBottom="10dp"
+    android:background="#F5F5F5">
+
+    <TextView
+        android:id="@+id/managerItemName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Product Name"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333" />
+
+    <TextView
+        android:id="@+id/managerItemDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Product description"
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:paddingTop="4dp" />
+
+    <TextView
+        android:id="@+id/managerItemPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="$0.00"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:paddingTop="6dp" />
+
+    <TextView
+        android:id="@+id/managerItemAvailability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Available"
+        android:textColor="#2E7D32"
+        android:paddingTop="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:paddingTop="8dp">
+
+        <Button
+            android:id="@+id/btnEditProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit" />
+
+        <Button
+            android:id="@+id/btnDeleteProduct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete" />
+
+    </LinearLayout>
+
+</LinearLayout>
