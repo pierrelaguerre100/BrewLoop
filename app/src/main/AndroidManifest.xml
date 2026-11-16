@@ -25,6 +25,9 @@
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".RewardsActivity"
             android:exported="false"/>
 
