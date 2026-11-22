@@ -95,6 +95,9 @@ public class MainActivity extends AppCompatActivity {
              findViewById(R.id.buttonRewards).setOnClickListener(v ->
                      startActivity(new Intent(this, RewardsActivity.class)));
 
+             findViewById(R.id.buttonOpenMenu).setOnClickListener(v ->
+                startActivity(new Intent(this, MenuActivity.class)));
+
             readData(usersReference, textViewUsers, "USERS");
             readData(menuReference, textViewMenu, "MENU ITEMS");
             readData(optionsReference, textViewOptions, "CUSTOMIZATION OPTION");
