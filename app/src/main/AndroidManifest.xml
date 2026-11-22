@@ -24,6 +24,9 @@
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
+            android:name=".OrderHistoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".ManagerMenuActivity"
             android:exported="false" />
         <activity

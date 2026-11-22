@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="#F8F6F0"
+    android:padding="24dp"
     android:fitsSystemWindows="true">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:text="My Rewards"
+        android:textColor="#54240C"
         android:textSize="24sp"
         android:textStyle="bold"/>
+
     <TextView
         android:id="@+id/textViewBalance"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:gravity="center"
         android:text="0 points"
+        android:textColor="#54240C"
         android:textSize="36sp" />
 
     <ProgressBar
@@ -26,20 +33,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:max="50" />
+        android:max="50"
+        android:progressTint="#54240C"/>
 
     <TextView
         android:id="@+id/textViewProgress"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="" />
+        android:gravity="center"
+        android:text=""
+        android:textColor="#54240C"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Points history"
+        android:textColor="#54240C"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -51,8 +62,19 @@
 
     <TextView
         android:id="@+id/textViewEmptyHistory"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No points activity yet." />
+        android:gravity="center"
+        android:text="No points activity yet"
+        android:textColor="#54240C"/>
+
+    <Button
+        android:id="@+id/buttonBackRewards"
+        android:layout_width="160dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:text="Back"
+        app:backgroundTint="#54240C"/>
 
 </LinearLayout>
