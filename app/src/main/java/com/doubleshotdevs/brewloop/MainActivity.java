@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
                     addNewData(pointsReference, "ord100_earn", new PointsTransaction("u001", "ord100", "earn", 7));
 
         });
+             findViewById(R.id.buttonManagerMenu).setOnClickListener(v ->
+                startActivity(new Intent(this, ManagerMenuActivity.class)));
 
              findViewById(R.id.buttonRewards).setOnClickListener(v ->
                      startActivity(new Intent(this, RewardsActivity.class)));
