@@ -40,6 +40,7 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore)
     implementation(libs.recyclerview)
     implementation(libs.material)
     testImplementation(libs.junit)

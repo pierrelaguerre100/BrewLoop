@@ -33,4 +33,16 @@ public final class OrderStatus {
         String next = next(status);
         return next == null ? "Order Completed" : "Mark " + next;
     }
+
+    /**
+     * Returns a friendly status label for customers.
+     *
+     * @param status status stored in Firebase
+     * @return the label to display in the tracking screen
+     */
+    public static String displayName(String status) {
+        if (READY.equals(status)) return "Ready for Pickup";
+        return status == null ? "Unknown" : status;
+    }
+
 }

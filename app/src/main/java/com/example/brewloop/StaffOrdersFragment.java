@@ -1,11 +1,9 @@
 package com.example.brewloop;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.content.Intent;
+import android.content.Context;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +17,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Staff order queue.
- * Future weeks will replace the sample list with Firebase Realtime Database.
+ * Displays live incoming coffee orders and allows staff to advance statuses.
  */
 public class StaffOrdersFragment extends Fragment {
     private final List<Order> orders = new ArrayList<>();
@@ -54,11 +53,11 @@ public class StaffOrdersFragment extends Fragment {
         activeCount = view.findViewById(R.id.textStaffActiveCount);
         readyCount = view.findViewById(R.id.textStaffReadyCount);
         connectionText = view.findViewById(R.id.textStaffConnection);
-        view.findViewById(R.id.buttonStaffSignOut).setOnClickListener(v -> signOutStaff());
+
         RecyclerView recyclerView = view.findViewById(R.id.recyclerStaffOrders);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        adapter = new StaffOrderAdapter(order -> updateOrderStatus(order));
+        adapter = new StaffOrderAdapter(this::updateOrderStatus);
         recyclerView.setAdapter(adapter);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -75,6 +74,7 @@ public class StaffOrdersFragment extends Fragment {
         ordersListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || adapter == null) return;
                 orders.clear();
                 for (DataSnapshot child : snapshot.getChildren()) {
                     Order order = child.getValue(Order.class);
@@ -86,14 +86,12 @@ public class StaffOrdersFragment extends Fragment {
                     }
                 }
                 refreshScreen();
-                if (connectionText != null) {
-                    connectionText.setText("Connected: " + orders.size() + " orders");
-                }
+                connectionText.setText("Connected: " + orders.size() + " orders");
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                showError("Orders: " + error.getMessage());
+                showError("Unable to read orders: " + error.getMessage());
             }
         };
         ordersRef.addValueEventListener(ordersListener);
@@ -104,6 +102,7 @@ public class StaffOrdersFragment extends Fragment {
         itemsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || adapter == null) return;
                 itemsByOrder.clear();
                 for (DataSnapshot child : snapshot.getChildren()) {
                     OrderItem item = child.getValue(OrderItem.class);
@@ -120,7 +119,7 @@ public class StaffOrdersFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                showError("OrderItems: " + error.getMessage());
+                showError("Unable to read order items: " + error.getMessage());
             }
         };
         itemsRef.addValueEventListener(itemsListener);
@@ -131,6 +130,7 @@ public class StaffOrdersFragment extends Fragment {
         menuListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!isAdded() || adapter == null) return;
                 menuNames.clear();
                 for (DataSnapshot child : snapshot.getChildren()) {
                     String name = child.child("name").getValue(String.class);
@@ -143,7 +143,7 @@ public class StaffOrdersFragment extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                showError("MenuItems: " + error.getMessage());
+                showError("Unable to read menu: " + error.getMessage());
             }
         };
         menuRef.addValueEventListener(menuListener);
@@ -164,32 +164,43 @@ public class StaffOrdersFragment extends Fragment {
         readyCount.setText(String.valueOf(ready));
     }
 
-    /** Moves an order to the next status in Firebase (single-staff demo version). */
+    /** Advances an order by exactly one step in the shared Firebase record. */
     private void updateOrderStatus(Order order) {
         if (ordersRef == null || order.getOrderID() == null) return;
         String next = OrderStatus.next(order.getStatus());
         if (next == null) return;
 
         ordersRef.child(order.getOrderID()).child("status")
-                .setValue(next)
-                .addOnSuccessListener(unused -> {
-                    if (isAdded()) Toast.makeText(requireContext(),
-                            "Status changed to " + next, Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(error -> showError("Update failed: " + error.getMessage()));
+                .runTransaction(new Transaction.Handler() {
+                    @NonNull
+                    @Override
+                    public Transaction.Result doTransaction(@NonNull MutableData current) {
+                        String latest = current.getValue(String.class);
+                        // Only advance if the current value still matches the button.
+                        if (!order.getStatus().equals(latest)) return Transaction.abort();
+                        current.setValue(next);
+                        return Transaction.success(current);
+                    }
+
+                    @Override
+                    public void onComplete(@Nullable DatabaseError error,
+                                           boolean committed,
+                                           @Nullable DataSnapshot snapshot) {
+                        if (!isAdded()) return;
+                        if (error != null) {
+                            showError("Status update failed: " + error.getMessage());
+                        } else if (committed) {
+                            Toast.makeText(requireContext(), "Changed to " + next,
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(),
+                                    "Order changed elsewhere. Try again.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
-    /** Ends the local demo staff session and returns to the login screen. */
-    private void signOutStaff() {
-        // Mark the demo staff session as signed out.
-        SharedPreferences preferences = requireContext()
-                .getSharedPreferences("staff_demo", Context.MODE_PRIVATE);
-        preferences.edit().putBoolean("logged_in", false).apply();
-
-        Toast.makeText(requireContext(), "Staff signed out", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(requireContext(), StaffLoginActivity.class));
-        requireActivity().finish();
-    }
 
     /** Displays a database error on the screen. */
     private void showError(String message) {

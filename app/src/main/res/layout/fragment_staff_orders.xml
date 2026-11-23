@@ -30,7 +30,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="WEEK 2 · Firebase Realtime Database"
+        android:text="WEEK 3 · Firebase Realtime Database"
         android:textSize="12sp"
         android:textColor="#866F61" />
     

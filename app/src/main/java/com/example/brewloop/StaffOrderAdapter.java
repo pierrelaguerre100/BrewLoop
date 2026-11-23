@@ -11,10 +11,6 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.brewloop.R;
-import com.example.brewloop.Order;
-import com.example.brewloop.OrderItem;
-import com.example.brewloop.OrderStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,7 +75,7 @@ public class StaffOrderAdapter extends RecyclerView.Adapter<StaffOrderAdapter.Or
         holder.customerId.setText("Customer: " + order.getUserID());
         holder.pickup.setText("Pickup " + order.getPickupTime());
         holder.total.setText(String.format(Locale.US, "$%.2f", order.getTotalPrice()));
-        holder.status.setText(order.getStatus());
+        holder.status.setText(OrderStatus.displayName(order.getStatus()));
         holder.items.setText(createItemSummary(itemsByOrder.getOrDefault(
                 order.getOrderID(), Collections.emptyList())));
 
@@ -101,15 +97,11 @@ public class StaffOrderAdapter extends RecyclerView.Adapter<StaffOrderAdapter.Or
         });
     }
 
+    /** Returns the number of orders currently displayed. */
     @Override
     public int getItemCount() {
-        return orders.size();
-    }
 
-    /** Redraws only the order whose status has changed. */
-    public void notifyOrderChanged(Order order) {
-        int index = orders.indexOf(order);
-        if (index >= 0) notifyItemChanged(index);
+        return orders.size();
     }
 
     /** Builds readable text for each item in a customer's order. */

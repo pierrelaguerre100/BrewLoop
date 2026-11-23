@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#F6F1EB">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Page heading -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BREWLOOP / TRACK ORDER"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#86593F" />
+
+        <!-- Order ID -->
+        <TextView
+            android:id="@+id/textTrackingOrderId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Order #..."
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#302016" />
+
+        <!-- Current status label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="CURRENT STATUS"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#956240" />
+
+        <!-- Current order status -->
+        <TextView
+            android:id="@+id/textTrackingStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Loading..."
+            android:textSize="23sp"
+            android:textStyle="bold"
+            android:textColor="#275C4A" />
+
+        <!-- Pickup time and total price -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <!-- Pickup time card -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="90dp"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/staff_summary_card">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="PICKUP TIME"
+                    android:textSize="11sp"
+                    android:textColor="#755F52" />
+
+                <TextView
+                    android:id="@+id/textTrackingPickup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="—"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#352219" />
+
+            </LinearLayout>
+
+            <!-- Space between the cards -->
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="1dp" />
+
+            <!-- Order total card -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="90dp"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/staff_summary_card">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="ORDER TOTAL"
+                    android:textSize="11sp"
+                    android:textColor="#755F52" />
+
+                <TextView
+                    android:id="@+id/textTrackingTotal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="—"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#352219" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Progress section heading -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="Your Order Progress"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#302016" />
+
+        <!-- Progress steps -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textStepReceived"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="○  1. Received"
+                android:textSize="17sp"
+                android:textColor="#83786F" />
+
+            <TextView
+                android:id="@+id/textStepPreparing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="○  2. Preparing"
+                android:textSize="17sp"
+                android:textColor="#83786F" />
+
+            <TextView
+                android:id="@+id/textStepReady"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="○  3. Ready for Pickup"
+                android:textSize="17sp"
+                android:textColor="#83786F" />
+
+            <TextView
+                android:id="@+id/textStepCompleted"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:padding="12dp"
+                android:text="○  4. Completed"
+                android:textSize="17sp"
+                android:textColor="#83786F" />
+
+        </LinearLayout>
+
+        <!-- Firebase message -->
+        <TextView
+            android:id="@+id/textTrackingMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Waiting for Firebase..."
+            android:textSize="14sp"
+            android:textColor="#725F51" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
         WindowCompat.enableEdgeToEdge(getWindow());
         setContentView(R.layout.activity_main);
         findViewById(R.id.buttonStaffPreview).setOnClickListener(v -> {
-                    Intent intent = new Intent(MainActivity.this, StaffOrdersActivity.class);
+                    Intent intent = new Intent(MainActivity.this, StaffLoginActivity.class);
                     startActivity(intent);
         });
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {

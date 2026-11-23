@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:gravity="center"
-            android:text="Staff Sign In — Week 2 Preview"
+            android:text="Staff Sign In — Week 3 Preview"
             android:textSize="17sp"
             android:textColor="#453329" />
 
