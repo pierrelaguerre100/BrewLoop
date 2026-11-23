@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BrewLoop</string>
+    <string name="cart_item_details">%1$s\n%2$s</string>
 </resources>

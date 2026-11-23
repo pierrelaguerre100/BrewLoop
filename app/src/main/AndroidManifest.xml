@@ -20,11 +20,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
         <activity
             android:name=".ManagerMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CartActivity"
             android:exported="false" />
         <activity
             android:name=".RewardsActivity"
