@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -40,6 +39,9 @@ public class ManagerMenuActivity extends AppCompatActivity {
     private ValueEventListener menuListener;
 
     private Button btnAddProduct;
+
+    /** The manager access check in progress, cancelled if the screen closes first. */
+    private UserRepository.PendingLoad accessCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,13 +70,20 @@ public class ManagerMenuActivity extends AppCompatActivity {
 
         managerMenuList.setAdapter(adapter);
 
-        menuRef = FirebaseDatabase.getInstance()
-                .getReference("MenuItems");
+        // Use the configured database so the emulator build never reaches the shared project.
+        menuRef = FirebaseAccess.node(FirebaseNodes.MENU_ITEMS);
 
         btnAddProduct.setOnClickListener(v ->
                 showProductDialog(null));
 
-        loadProducts();
+        // Only a signed-in manager, checked against the stored profile, may manage the menu.
+        // The database rules enforce the same restriction on every write.
+        btnAddProduct.setEnabled(false);
+        accessCheck = Session.requireAccess(this, Session.Access.MANAGER, profile -> {
+            accessCheck = null;
+            btnAddProduct.setEnabled(true);
+            loadProducts();
+        });
     }
 
     private void loadProducts() {
@@ -379,6 +388,10 @@ public class ManagerMenuActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
+        if (accessCheck != null) {
+            accessCheck.cancel();
+            accessCheck = null;
+        }
         if (menuRef != null && menuListener != null) {
             menuRef.removeEventListener(menuListener);
         }

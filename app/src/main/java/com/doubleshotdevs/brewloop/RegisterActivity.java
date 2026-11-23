@@ -1,7 +1,6 @@
 package com.doubleshotdevs.brewloop;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -9,8 +8,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -27,17 +26,15 @@ import com.google.firebase.auth.FirebaseUser;
  *
  * <p>Opened with {@link #EXTRA_COMPLETE_PROFILE} set to {@code true}, the screen starts in
  * that mode for the signed-in user. The profile is only ever created when none exists, so
- * an existing profile, role, or points balance is never overwritten.</p>
+ * an existing profile, role, or points balance is never overwritten. The requests run in
+ * {@link RegistrationViewModel}, so they continue if the screen is recreated.</p>
  */
 public class RegisterActivity extends AppCompatActivity {
 
     /** Boolean extra: start in "finish setup" mode for the signed-in user. */
     public static final String EXTRA_COMPLETE_PROFILE = "completeProfile";
 
-    private static final String STATE_COMPLETE_PROFILE = "completeProfileMode";
-    private static final String TAG = "RegisterActivity";
-
-    private final UserRepository userRepository = new UserRepository();
+    private RegistrationViewModel viewModel;
 
     private TextView title;
     private TextView intro;
@@ -53,15 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
     private Button signOutButton;
     private ProgressBar progress;
     private TextView errorText;
-
-    /** True when the account exists and only the profile still needs to be saved. */
-    private boolean completeProfileMode;
-
-    /** True while an account or profile request is running. */
-    private boolean busy;
-
-    @Nullable
-    private UserRepository.PendingLoad pendingCreation;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,51 +71,32 @@ public class RegisterActivity extends AppCompatActivity {
         progress = findViewById(R.id.progressRegister);
         errorText = findViewById(R.id.textRegisterError);
 
+        viewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
+        viewModel.initialize(getIntent().getBooleanExtra(EXTRA_COMPLETE_PROFILE, false));
+
         submitButton.setOnClickListener(v -> submit());
         signOutButton.setOnClickListener(v -> Session.signOut(this));
-
-        completeProfileMode = savedInstanceState != null
-                ? savedInstanceState.getBoolean(STATE_COMPLETE_PROFILE)
-                : getIntent().getBooleanExtra(EXTRA_COMPLETE_PROFILE, false);
+        viewModel.getState().observe(this, this::render);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        RegistrationViewModel.State state = viewModel.getState().getValue();
+        boolean completeProfileMode = state != null && state.completeProfileMode;
         FirebaseUser user = FirebaseAccess.auth().getCurrentUser();
         if (completeProfileMode && user == null) {
             // Signed out elsewhere; there is no account to finish setting up.
             Session.restartAtSignIn(this);
-            return;
-        }
-        if (!completeProfileMode && user != null) {
+        } else if (!completeProfileMode && user != null && !viewModel.isWorking()) {
             // An account is already signed in, so registering another is not allowed here.
             Session.restartAtSignIn(this);
-            return;
         }
-        applyMode();
-        setBusy(false);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (pendingCreation != null) {
-            // The create-if-missing write may still finish; it is safe to repeat.
-            pendingCreation.cancel();
-            pendingCreation = null;
-        }
-    }
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(STATE_COMPLETE_PROFILE, completeProfileMode);
     }
 
     /** Validates the form, then registers or finishes setting up the account. */
     private void submit() {
-        if (busy) {
+        if (viewModel.isWorking()) {
             return;
         }
         errorText.setVisibility(View.GONE);
@@ -135,9 +104,10 @@ public class RegisterActivity extends AppCompatActivity {
         CredentialValidator.Error nameError = CredentialValidator.validateName(name);
         nameLayout.setError(errorMessage(nameError));
 
-        if (completeProfileMode) {
+        RegistrationViewModel.State state = viewModel.getState().getValue();
+        if (state != null && state.completeProfileMode) {
             if (nameError == null) {
-                saveProfile(name);
+                viewModel.saveProfileForSignedInUser(name.trim());
             }
             return;
         }
@@ -154,56 +124,42 @@ public class RegisterActivity extends AppCompatActivity {
         if (nameError != null || emailError != null || passwordError != null) {
             return;
         }
-
-        setBusy(true);
-        FirebaseAccess.auth()
-                .createUserWithEmailAndPassword(CredentialValidator.normalizeEmail(email), password)
-                .addOnCompleteListener(task -> {
-                    if (isFinishing() || isDestroyed()) {
-                        return;
-                    }
-                    if (task.isSuccessful()) {
-                        passwordInput.setText(null);
-                        confirmInput.setText(null);
-                        saveProfile(name);
-                    } else {
-                        Exception error = task.getException();
-                        Log.w(TAG, "Account creation failed: "
-                                + (error == null ? "unknown" : error.getClass().getSimpleName()));
-                        setBusy(false);
-                        showError(AuthErrorMessages.forException(error));
-                    }
-                });
+        viewModel.register(name.trim(), CredentialValidator.normalizeEmail(email), password);
     }
 
     /**
-     * Creates the customer profile for the signed-in account if it does not exist yet.
+     * Shows the current registration state.
      *
-     * @param name the customer's full name
+     * @param state the state to show
      */
-    private void saveProfile(@NonNull String name) {
-        setBusy(true);
-        pendingCreation = userRepository.createCustomerProfileIfMissing(name, result -> {
-            pendingCreation = null;
-            if (result.isSuccess()) {
-                // The sign-in screen routes by the stored role, which may belong to a profile
-                // that already existed.
-                Session.restartAtSignIn(this);
-                return;
-            }
-            // The account exists but has no usable profile: offer a retry without creating
-            // another account.
-            completeProfileMode = true;
-            applyMode();
-            setBusy(false);
-            showError(result.getStatus() == ProfileLoadStatus.NETWORK_ERROR
-                    ? R.string.error_profile_save_network
-                    : AuthErrorMessages.forProfileStatus(result.getStatus()));
-        });
+    private void render(@NonNull RegistrationViewModel.State state) {
+        if (state.phase == RegistrationViewModel.Phase.SUCCEEDED
+                || state.phase == RegistrationViewModel.Phase.SIGNED_OUT) {
+            // The sign-in screen routes by the stored role, or shows the form again.
+            Session.restartAtSignIn(this);
+            return;
+        }
+        applyMode(state.completeProfileMode);
+        if (state.completeProfileMode) {
+            // The account exists, so the password fields are no longer needed.
+            passwordInput.setText(null);
+            confirmInput.setText(null);
+        }
+        setBusy(state.phase == RegistrationViewModel.Phase.WORKING);
+        if (state.errorMessage != 0) {
+            errorText.setText(state.errorMessage);
+            errorText.setVisibility(View.VISIBLE);
+        } else {
+            errorText.setVisibility(View.GONE);
+        }
     }
 
-    /** Shows the fields and text for the current mode. */
-    private void applyMode() {
+    /**
+     * Shows the fields and text for a mode.
+     *
+     * @param completeProfileMode whether only the profile still needs to be saved
+     */
+    private void applyMode(boolean completeProfileMode) {
         int credentialVisibility = completeProfileMode ? View.GONE : View.VISIBLE;
         emailLayout.setVisibility(credentialVisibility);
         passwordLayout.setVisibility(credentialVisibility);
@@ -223,16 +179,6 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows an error below the form.
-     *
-     * @param message the error to show
-     */
-    private void showError(@StringRes int message) {
-        errorText.setText(message);
-        errorText.setVisibility(View.VISIBLE);
-    }
-
-    /**
      * Returns the message for a validation problem.
      *
      * @param error the problem, or {@code null}
@@ -249,7 +195,6 @@ public class RegisterActivity extends AppCompatActivity {
      * @param isBusy whether a request is running
      */
     private void setBusy(boolean isBusy) {
-        busy = isBusy;
         progress.setVisibility(isBusy ? View.VISIBLE : View.GONE);
         submitButton.setEnabled(!isBusy);
         signOutButton.setEnabled(!isBusy);

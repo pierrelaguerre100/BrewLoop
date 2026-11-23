@@ -11,6 +11,8 @@
     <string name="action_retry">Try again</string>
     <string name="action_complete_profile">Finish setting up my account</string>
     <string name="status_staff_unavailable">You are signed in with a staff account. The staff order queue is not available in this version of the app yet.</string>
+    <string name="status_manager_tools">You are signed in with a manager account. The staff order queue is not available in this version of the app yet, but you can manage the menu.</string>
+    <string name="action_manage_menu">Manage the menu</string>
     <string name="status_profile_missing">Your account was created, but your customer profile was not saved. Finish setting up your account to continue.</string>
 
     <!-- Registration -->
@@ -46,12 +48,13 @@
     <string name="error_account_disabled">This account has been disabled. Contact the shop.</string>
     <string name="error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
     <string name="error_network">Could not connect. Check your connection and try again.</string>
+    <string name="error_auth_not_enabled">Email sign-up is not turned on for this app yet. Contact the shop.</string>
     <string name="error_auth_generic">Something went wrong. Try again.</string>
     <string name="error_not_signed_in">You are signed out. Sign in again.</string>
 
     <!-- Profile errors -->
     <string name="error_profile_network">Could not load your profile. Check your connection and try again.</string>
-    <string name="error_profile_save_network">Your account was created, but your profile could not be saved yet. Check your connection and save it again.</string>
+    <string name="error_profile_save_network">Your account was created, but saving your profile could not be confirmed. Check your connection and try again.</string>
     <string name="error_profile_denied">Your profile could not be accessed. Contact the shop.</string>
     <string name="error_profile_malformed">Your profile has a problem the shop needs to fix. Contact the shop.</string>
     <string name="error_profile_role">Your account role is not recognized. Contact the shop.</string>

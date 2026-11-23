@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         signedInUid = uid;
+        Session.claimCartFor(uid);
         FirebaseAccess.auth().addAuthStateListener(accountWatcher);
         loadProfile();
     }

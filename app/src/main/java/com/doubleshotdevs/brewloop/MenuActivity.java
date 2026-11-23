@@ -37,10 +37,13 @@ public class MenuActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // The menu is readable only by signed-in users.
-        if (Session.requireSignedInUid(this) == null) {
+        // The menu is readable only by signed-in users, and the shared cart belongs to the
+        // signed-in account.
+        String uid = Session.requireSignedInUid(this);
+        if (uid == null) {
             return;
         }
+        Session.claimCartFor(uid);
         setContentView(R.layout.activity_menu);
 
         RecyclerView list = findViewById(R.id.menuList);

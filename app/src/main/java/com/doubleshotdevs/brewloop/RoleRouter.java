@@ -19,10 +19,16 @@ public final class RoleRouter {
         /** Open the customer home screen. */
         CUSTOMER_HOME,
         /**
-         * The user is staff or a manager, but the staff order queue has not been added to
-         * the project yet, so show an explicit "not available yet" state.
+         * The user is staff. The staff order queue has not been added to the project yet, so
+         * show an explicit "not available yet" state.
          */
         STAFF_UNAVAILABLE,
+        /**
+         * The user is a manager. The staff order queue is not available yet, but the
+         * existing menu management screen is, so offer it alongside the explicit
+         * "not available yet" state.
+         */
+        MANAGER_TOOLS,
         /**
          * The account exists but its profile record does not, usually because registration
          * was interrupted. Offer to finish creating the customer profile.
@@ -74,13 +80,17 @@ public final class RoleRouter {
      *
      * @param role the stored role, or {@code null} if it is unsupported
      * @return {@link Destination#CUSTOMER_HOME} for customers,
-     *         {@link Destination#STAFF_UNAVAILABLE} for staff and managers, and
+     *         {@link Destination#MANAGER_TOOLS} for managers,
+     *         {@link Destination#STAFF_UNAVAILABLE} for staff, and
      *         {@link Destination#CONTACT_SHOP} otherwise
      */
     @NonNull
     static Destination routeForRole(UserRole role) {
         if (role == UserRole.CUSTOMER) {
             return Destination.CUSTOMER_HOME;
+        }
+        if (role != null && role.hasManagerAccess()) {
+            return Destination.MANAGER_TOOLS;
         }
         if (role != null && role.hasStaffAccess()) {
             return Destination.STAFF_UNAVAILABLE;

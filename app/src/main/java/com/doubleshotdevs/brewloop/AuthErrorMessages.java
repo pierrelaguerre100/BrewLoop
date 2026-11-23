@@ -8,13 +8,23 @@ import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.FirebaseAuthException;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
- * Turns Firebase Authentication failures and validation errors into messages for the user.
+ * Turns Firebase Authentication failures and validation errors into messages for the user,
+ * and into short diagnostic codes that are safe to log.
  *
  * <p>Sign-in failures for an unknown email and a wrong password share one message, so the
  * screen does not reveal which email addresses have accounts.</p>
  */
 public final class AuthErrorMessages {
+
+    /**
+     * Matches the server error code that Firebase puts in square brackets at the end of some
+     * messages, for example {@code [ CONFIGURATION_NOT_FOUND ]}.
+     */
+    private static final Pattern BRACKETED_CODE = Pattern.compile("\\[\\s*([A-Z][A-Z0-9_]{2,60})\\s*]");
 
     private AuthErrorMessages() {
         // Static helpers only.
@@ -37,13 +47,15 @@ public final class AuthErrorMessages {
         if (error instanceof FirebaseAuthException) {
             return forErrorCode(((FirebaseAuthException) error).getErrorCode());
         }
-        return R.string.error_auth_generic;
+        String code = bracketedCode(error == null ? null : error.getMessage());
+        return code == null ? R.string.error_auth_generic : forErrorCode(code);
     }
 
     /**
      * Returns the message for a Firebase Authentication error code.
      *
-     * @param errorCode a code from {@link FirebaseAuthException#getErrorCode()}
+     * @param errorCode a code from {@link FirebaseAuthException#getErrorCode()}, or a server
+     *                  code such as {@code CONFIGURATION_NOT_FOUND}
      * @return a string resource ID describing the failure
      */
     @StringRes
@@ -63,9 +75,55 @@ public final class AuthErrorMessages {
                 return R.string.error_account_disabled;
             case "ERROR_TOO_MANY_REQUESTS":
                 return R.string.error_too_many_attempts;
+            case "ERROR_OPERATION_NOT_ALLOWED":
+            case "OPERATION_NOT_ALLOWED":
+            case "CONFIGURATION_NOT_FOUND":
+                // The Firebase project has not enabled Email/Password sign-in.
+                return R.string.error_auth_not_enabled;
+            case "ERROR_NETWORK_REQUEST_FAILED":
+                return R.string.error_network;
             default:
                 return R.string.error_auth_generic;
         }
+    }
+
+    /**
+     * Returns a short code that identifies an Authentication failure without exposing the
+     * email address, password, or token involved.
+     *
+     * <p>The result is the Firebase error code when there is one, otherwise the code in
+     * square brackets at the end of the message, otherwise only the exception class name.
+     * The full message is never returned because it can contain the email address.</p>
+     *
+     * @param error the task's exception, which may be {@code null}
+     * @return a code such as {@code ERROR_OPERATION_NOT_ALLOWED}, safe to write to the log
+     */
+    @NonNull
+    public static String diagnosticCode(@Nullable Exception error) {
+        if (error == null) {
+            return "unknown";
+        }
+        String type = error.getClass().getSimpleName();
+        if (error instanceof FirebaseAuthException) {
+            return type + "/" + ((FirebaseAuthException) error).getErrorCode();
+        }
+        String code = bracketedCode(error.getMessage());
+        return code == null ? type : type + "/" + code;
+    }
+
+    /**
+     * Extracts a server error code written in square brackets.
+     *
+     * @param message an exception message, which may be {@code null}
+     * @return the code, or {@code null} if the message has none
+     */
+    @Nullable
+    static String bracketedCode(@Nullable String message) {
+        if (message == null) {
+            return null;
+        }
+        Matcher matcher = BRACKETED_CODE.matcher(message);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     /**

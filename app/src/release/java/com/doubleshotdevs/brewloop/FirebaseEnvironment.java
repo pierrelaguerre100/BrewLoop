@@ -1,5 +1,6 @@
 package com.doubleshotdevs.brewloop;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -32,5 +33,14 @@ public final class FirebaseEnvironment {
      */
     public static boolean isLocalTestMode() {
         return false;
+    }
+
+    /**
+     * Requests any permission needed to reach the local emulators.
+     *
+     * @param activity the screen that would show the request (unused in this variant)
+     */
+    public static void requestLocalNetworkAccess(@NonNull Activity activity) {
+        // This build uses the shared project over the internet; nothing to request.
     }
 }

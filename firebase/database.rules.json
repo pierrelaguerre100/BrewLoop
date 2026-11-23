@@ -15,7 +15,7 @@
           ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
         },
         "email": {
-          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 254"
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 254 && (data.exists() ? newData.val() === data.val() : newData.val() === auth.token.email)"
         },
         "role": {
           ".validate": "newData.isString() && ((!data.exists() && newData.val() === 'customer') || newData.val() === data.val())"
@@ -65,10 +65,10 @@
         },
         "pointsEarned": {
           ".write": "auth != null && data.parent().child('pointsAwarded').val() === false && newData.parent().child('pointsAwarded').val() === true && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
-          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0 && newData.val() <= newData.parent().child('totalPrice').val() && newData.val() > newData.parent().child('totalPrice').val() - 1"
         },
         "rewardApplied": {
-          ".validate": "newData.isBoolean() && (!data.exists() || newData.val() === data.val())"
+          ".validate": "newData.isBoolean() && (data.exists() ? newData.val() === data.val() : (newData.val() === false || (newData.parent().parent().parent().child('PointsTransaction').child($orderId + '_redeem').child('userID').val() === auth.uid && !root.child('PointsTransaction').child($orderId + '_redeem').exists() && newData.parent().parent().parent().child('Users').child(auth.uid).child('pointsBalance').val() === root.child('Users').child(auth.uid).child('pointsBalance').val() - 50)))"
         },
         "pointsAwarded": {
           ".write": "auth != null && data.val() === false && newData.val() === true && newData.parent().child('status').val() === 'Completed' && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
@@ -122,7 +122,7 @@
       ".indexOn": ["userID"],
       "$txId": {
         ".read": "auth != null && data.exists() && (data.child('userID').val() === auth.uid || root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')",
-        ".write": "auth != null && !data.exists() && newData.child('orderID').isString() && ((newData.child('type').val() === 'redeem' && newData.child('userID').val() === auth.uid && newData.child('points').val() === -50 && $txId === newData.child('orderID').val() + '_redeem') || (newData.child('type').val() === 'earn' && $txId === newData.child('orderID').val() + '_earn' && root.child('Orders').child(newData.child('orderID').val()).child('userID').val() === newData.child('userID').val() && (root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')))",
+        ".write": "auth != null && !data.exists() && newData.child('orderID').isString() && ((newData.child('type').val() === 'redeem' && newData.child('userID').val() === auth.uid && newData.child('points').val() === -50 && $txId === newData.child('orderID').val() + '_redeem' && !root.child('Orders').child(newData.child('orderID').val()).exists() && newData.parent().parent().child('Orders').child(newData.child('orderID').val()).child('rewardApplied').val() === true && newData.parent().parent().child('Users').child(auth.uid).child('pointsBalance').val() === root.child('Users').child(auth.uid).child('pointsBalance').val() - 50) || (newData.child('type').val() === 'earn' && $txId === newData.child('orderID').val() + '_earn' && root.child('Orders').child(newData.child('orderID').val()).child('userID').val() === newData.child('userID').val() && root.child('Orders').child(newData.child('orderID').val()).child('pointsAwarded').val() === false && newData.parent().parent().child('Orders').child(newData.child('orderID').val()).child('pointsAwarded').val() === true && newData.child('points').val() === newData.parent().parent().child('Orders').child(newData.child('orderID').val()).child('pointsEarned').val() &&(root.child('Users').child(auth.uid).child('role').val() === 'staff' || root.child('Users').child(auth.uid).child('role').val() === 'manager')))",
         ".validate": "newData.hasChildren(['userID', 'orderID', 'type', 'points'])",
         "transactionID": {
           ".validate": "newData.val() === $txId"

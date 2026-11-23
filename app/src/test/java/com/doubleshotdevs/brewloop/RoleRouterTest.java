@@ -20,10 +20,10 @@ public class RoleRouterTest {
     }
 
     @Test
-    public void staffAndManager_getUnavailableState() {
+    public void staff_getsUnavailableState_andManager_getsManagerTools() {
         assertEquals(RoleRouter.Destination.STAFF_UNAVAILABLE,
                 RoleRouter.route(profileWithRole("staff")));
-        assertEquals(RoleRouter.Destination.STAFF_UNAVAILABLE,
+        assertEquals(RoleRouter.Destination.MANAGER_TOOLS,
                 RoleRouter.route(profileWithRole("manager")));
     }
 

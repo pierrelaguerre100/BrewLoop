@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -102,6 +103,66 @@ final class EmulatorAdmin {
                 + "/accounts:delete", body);
     }
 
+    /** An Authentication emulator account created over REST, with its ID token. */
+    static final class TestUser {
+        final String uid;
+        final String email;
+        final String idToken;
+
+        TestUser(@NonNull String uid, @NonNull String email, @NonNull String idToken) {
+            this.uid = uid;
+            this.email = email;
+            this.idToken = idToken;
+        }
+    }
+
+    /**
+     * Creates an Authentication emulator account and returns its ID token, so tests can send
+     * database requests exactly as that user, without the app's own checks.
+     *
+     * @param email    the account's email address
+     * @param password the account's password, used only for this emulator account
+     * @return the new account
+     * @throws Exception if the emulator rejects the request
+     */
+    @NonNull
+    static TestUser signUp(@NonNull String email, @NonNull String password) throws Exception {
+        requireDemoEmulator();
+        String body = "{\"email\":" + JSONObject.quote(email) + ",\"password\":"
+                + JSONObject.quote(password) + ",\"returnSecureToken\":true}";
+        JSONObject response = new JSONObject(send("POST", AUTH_BASE
+                + "identitytoolkit.googleapis.com/v1/accounts:signUp?key=demo-api-key",
+                body, false).body);
+        return new TestUser(response.getString("localId"), email,
+                response.getString("idToken"));
+    }
+
+    /**
+     * Sends a database request as a user, or with no authentication, so the security rules
+     * decide the outcome.
+     *
+     * @param method the HTTP method
+     * @param path   the database path; an empty string is the database root
+     * @param query  extra query parameters such as {@code orderBy="userID"}, or {@code null}
+     * @param body   the request body, or {@code null}
+     * @param user   the user to act as, or {@code null} for an unauthenticated request
+     * @return the HTTP status code
+     * @throws IOException if the emulator cannot be reached
+     */
+    static int requestAs(@NonNull String method, @NonNull String path, @Nullable String query,
+                         @Nullable String body, @Nullable TestUser user) throws IOException {
+        requireDemoEmulator();
+        StringBuilder url = new StringBuilder(DATABASE_BASE).append(path).append(".json?ns=")
+                .append(DATABASE_NAMESPACE);
+        if (user != null) {
+            url.append("&auth=").append(URLEncoder.encode(user.idToken, "UTF-8"));
+        }
+        if (query != null) {
+            url.append('&').append(query);
+        }
+        return send(method, url.toString(), body, false).code;
+    }
+
     /**
      * Sends a database request.
      *
@@ -130,12 +191,46 @@ final class EmulatorAdmin {
     @NonNull
     private static String send(@NonNull String method, @NonNull String url,
                                @Nullable String body) throws IOException {
+        Response response = send(method, url, body, true);
+        if (response.code >= 400) {
+            throw new IOException(method + " failed with HTTP " + response.code + ": "
+                    + response.body);
+        }
+        return response.body;
+    }
+
+    /** An HTTP status code and response body. */
+    private static final class Response {
+        final int code;
+        final String body;
+
+        Response(int code, @NonNull String body) {
+            this.code = code;
+            this.body = body;
+        }
+    }
+
+    /**
+     * Sends one request to an emulator.
+     *
+     * @param method the HTTP method
+     * @param url    the emulator URL
+     * @param body   the request body, or {@code null}
+     * @param admin  whether to send the emulator administrator token
+     * @return the status code and body
+     * @throws IOException if the emulator cannot be reached
+     */
+    @NonNull
+    private static Response send(@NonNull String method, @NonNull String url,
+                                 @Nullable String body, boolean admin) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         try {
             connection.setRequestMethod(method);
             connection.setConnectTimeout(TIMEOUT_MILLIS);
             connection.setReadTimeout(TIMEOUT_MILLIS);
-            connection.setRequestProperty("Authorization", "Bearer owner");
+            if (admin) {
+                connection.setRequestProperty("Authorization", "Bearer owner");
+            }
             if (body != null) {
                 connection.setDoOutput(true);
                 connection.setRequestProperty("Content-Type", "application/json");
@@ -145,11 +240,7 @@ final class EmulatorAdmin {
             }
             int code = connection.getResponseCode();
             InputStream stream = code < 400 ? connection.getInputStream() : connection.getErrorStream();
-            String response = stream == null ? "" : readAll(stream);
-            if (code >= 400) {
-                throw new IOException(method + " failed with HTTP " + code + ": " + response);
-            }
-            return response;
+            return new Response(code, stream == null ? "" : readAll(stream));
         } finally {
             connection.disconnect();
         }

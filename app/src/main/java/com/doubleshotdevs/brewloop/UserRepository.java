@@ -18,7 +18,9 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Loads and creates the signed-in user's own profile at {@code Users/{uid}}.
@@ -51,6 +53,15 @@ public class UserRepository {
     public static final long DEFAULT_TIMEOUT_MILLIS = 15_000L;
 
     private static final String TAG = "UserRepository";
+
+    /**
+     * UIDs whose profile creation timed out or was cancelled in this process before the
+     * server answered. The database SDK keeps such a write pending locally, so a later
+     * create-if-missing attempt would see that unconfirmed local copy as an existing profile.
+     * While a UID is listed, that answer is reported as unconfirmed instead of as success.
+     * Accessed only on the main thread.
+     */
+    private static final Set<String> UNCONFIRMED_CREATIONS = new HashSet<>();
 
     private final FirebaseAuth auth;
     private final FirebaseDatabase database;
@@ -216,6 +227,10 @@ public class UserRepository {
                 Log.w(TAG, "Profile data could not be read", e);
                 result = ProfileLoadResult.failure(ProfileLoadStatus.MALFORMED);
             }
+            if (result.isSuccess() && UNCONFIRMED_CREATIONS.contains(uid)) {
+                // The record may be this process's own unconfirmed write, not server data.
+                result = ProfileLoadResult.failure(ProfileLoadStatus.NETWORK_ERROR);
+            }
             if (!result.isSuccess()) {
                 Log.w(TAG, "Profile load failed: " + result.getStatus());
             }
@@ -271,9 +286,14 @@ public class UserRepository {
         private final Map<String, Object> newRecord;
         private final ProfileCallback callback;
         private boolean finished;
+        /** True once the database has answered this transaction. */
+        private boolean answered;
+        /** True if this transaction was left pending and its UID was listed as unconfirmed. */
+        private boolean listedUnconfirmed;
 
         final Runnable timeout = () -> {
             Log.w(TAG, "Profile creation timed out");
+            markUnconfirmedIfPending();
             finish(ProfileLoadResult.failure(ProfileLoadStatus.NETWORK_ERROR));
         };
 
@@ -316,14 +336,41 @@ public class UserRepository {
                     Log.w(TAG, "Existing profile is unusable: " + result.getStatus());
                 }
             }
-            ProfileLoadResult delivered = result;
-            mainHandler.post(() -> finish(delivered));
+            ProfileLoadResult answer = result;
+            mainHandler.post(() -> {
+                answered = true;
+                if (listedUnconfirmed) {
+                    // The server has now answered the earlier attempt for this account.
+                    UNCONFIRMED_CREATIONS.remove(uid);
+                    listedUnconfirmed = false;
+                }
+                ProfileLoadResult delivered = answer;
+                if (error == null && !committed && UNCONFIRMED_CREATIONS.contains(uid)) {
+                    // The "existing" record may be an earlier attempt's write that the server
+                    // has not confirmed yet, so it cannot be reported as saved.
+                    Log.w(TAG, "Existing profile is not confirmed by the server yet");
+                    delivered = ProfileLoadResult.failure(ProfileLoadStatus.NETWORK_ERROR);
+                }
+                finish(delivered);
+            });
         }
 
         @Override
         public void cancel() {
+            markUnconfirmedIfPending();
             finished = true;
             mainHandler.removeCallbacks(timeout);
+        }
+
+        /**
+         * Lists this account as having an unconfirmed creation if the database has not
+         * answered yet. The database keeps retrying the write after the app stops waiting.
+         */
+        private void markUnconfirmedIfPending() {
+            if (!answered && !finished && !listedUnconfirmed) {
+                UNCONFIRMED_CREATIONS.add(uid);
+                listedUnconfirmed = true;
+            }
         }
 
         /**

@@ -28,6 +28,12 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // The cart belongs to the signed-in account; another account's items are cleared.
+        String uid = Session.requireSignedInUid(this);
+        if (uid == null) {
+            return;
+        }
+        Session.claimCartFor(uid);
         setContentView(R.layout.activity_cart);
 
         totalView = findViewById(R.id.cartTotal);
