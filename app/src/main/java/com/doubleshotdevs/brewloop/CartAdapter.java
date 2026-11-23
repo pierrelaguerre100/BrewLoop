@@ -43,15 +43,62 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.Holder> {
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
         CartItem item = items.get(position);
+
         holder.name.setText(item.getName());
-        holder.details.setText(String.format(Locale.US, "%d x $%.2f = $%.2f",
-                item.getQuantity(), item.getPrice(), item.getLineTotal()));
+
+        String priceDetails = String.format(Locale.US,
+                "%d x $%.2f = $%.2f",
+                item.getQuantity(), item.getPrice(), item.getLineTotal());
+
+        String options = describeOptions(item);
+
+        if (!options.isEmpty()) {
+            holder.details.setText(
+                    holder.itemView.getContext().getString(
+                            R.string.cart_item_details,
+                            priceDetails,
+                            options
+                    )
+            );
+        } else {
+            holder.details.setText(priceDetails);
+        }
+
         holder.remove.setOnClickListener(v -> {
             int current = holder.getBindingAdapterPosition();
             if (current != RecyclerView.NO_POSITION) {
                 listener.onRemove(current);
             }
         });
+    }
+    private String describeOptions(CartItem item) {
+        StringBuilder options = new StringBuilder();
+
+        if (item.getSize() != null
+                && !item.getSize().isEmpty()
+                && !item.getSize().equalsIgnoreCase("n/a")) {
+            options.append(item.getSize());
+        }
+
+        if (item.getMilkType() != null
+                && !item.getMilkType().isEmpty()
+                && !item.getMilkType().equalsIgnoreCase("n/a")) {
+            if (options.length() > 0) {
+                options.append(" • ");
+            }
+            options.append(item.getMilkType());
+        }
+
+        if (item.getExtraShots() > 0) {
+            if (options.length() > 0) {
+                options.append(" • ");
+            }
+            options.append("+")
+                    .append(item.getExtraShots())
+                    .append(" extra shots");
+        }
+
+        return options.toString();
     }
 
     @Override
